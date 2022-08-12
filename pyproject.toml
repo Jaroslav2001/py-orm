@@ -3,6 +3,10 @@ name = "py_orm"
 version = "0.1.0"
 description = "ORM pydantic"
 authors = ["Your Jaroslav jarlitvin@gmail.com"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+py-orm = "py_orm.script.main:app"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -28,6 +32,7 @@ aiosqlite = ["aiosqlite"]
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"
+mkdocs-material = "^8.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
