@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 
+from error import NotSupportDriverError
+from py_orm import BaseModel
+
 
 class AbstractConnectionDriver(ABC):
     """PEP 249 - Python Database API Specification v2.0"""
@@ -17,6 +20,18 @@ class AbstractConnectionDriver(ABC):
 
     @abstractmethod
     def cursor(self):
+        pass
+
+    @abstractmethod
+    def __enter__(self):
+        pass
+
+    @abstractmethod
+    def __exit__(self):
+        pass
+
+    @abstractmethod
+    def __init__(self, *args, **kwargs):
         pass
 
 
@@ -45,3 +60,21 @@ class AbstractCursorDriver(ABC):
     @abstractmethod
     def fetchall(self):
         pass
+
+
+def connect(*args, **kwargs):
+    try:
+        class Connection(
+            BaseModel.config['driver'],
+            AbstractConnectionDriver
+        ):
+            pass
+
+        connection = Connection(*args, **kwargs)
+    except NotImplementedError:
+        raise NotSupportDriverError(type(BaseModel.config['driver']))
+    else:
+        return connection
+
+
+

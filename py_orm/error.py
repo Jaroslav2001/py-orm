@@ -1,0 +1,2 @@
+class NotSupportDriverError(Exception):
+    pass

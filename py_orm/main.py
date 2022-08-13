@@ -8,6 +8,7 @@ from typing import (
     Literal,
     Tuple,
     NoReturn,
+    Type,
 )
 
 from pydantic import BaseModel as _BaseModel
@@ -16,7 +17,7 @@ import pydantic.main
 
 class ConfigDict(TypedDict):
     """Global config PY ORM"""
-    driver: Any
+    driver: Type
     url: str
     migrate_files: str
 
