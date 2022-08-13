@@ -1,4 +1,4 @@
 __version__ = '0.1.0'
 
-from .main import BaseModel, TBaseModel
+from .main import BaseModel, TBaseModel, set_config
 from .field import Field

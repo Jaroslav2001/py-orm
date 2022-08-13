@@ -11,10 +11,11 @@ from typing import (
 )
 
 from pydantic import BaseModel as _BaseModel
-from pydantic.main import ModelMetaclass as _ModelMetaclass
+import pydantic.main
 
 
 class ConfigDict(TypedDict):
+    """Global config PY ORM"""
     driver: Any
     url: str
     migrate_files: str
@@ -29,7 +30,7 @@ def is_type(_type: Any, type_name: Literal['Optional']) -> Tuple[bool, tuple]:
     return False, tuple()
 
 
-class ModelMetaclass(_ModelMetaclass):
+class ModelMetaclass(pydantic.main.ModelMetaclass):
     __py_orm__: Set['TBaseModel'] = set()
     __config_py_orm__: ConfigDict
 
@@ -59,9 +60,9 @@ class BaseModel(_BaseModel, metaclass=ModelMetaclass):
     __py_orm__: Set['TBaseModel']
     __tabel_name__: Optional[Union[bool, str]]
 
-    @staticmethod
-    def set_config(config: ConfigDict) -> NoReturn:
-        BaseModel.__config_py_orm__ = config
+
+def set_config(config: ConfigDict) -> NoReturn:
+    BaseModel.__config_py_orm__ = config
 
 
 TBaseModel = TypeVar('TBaseModel', bound=BaseModel)

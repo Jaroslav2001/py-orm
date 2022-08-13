@@ -1,8 +1,8 @@
-from py_orm import BaseModel
+from py_orm import set_config
 
 
 def test_config():
-    BaseModel.set_config(
+    set_config(
         config={
             'driver': '',
             'url': '',
