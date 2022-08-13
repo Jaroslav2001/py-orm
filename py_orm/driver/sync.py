@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import TypeVar
 
 from error import NotSupportDriverError
 from py_orm import BaseModel
@@ -62,7 +63,7 @@ class AbstractCursorDriver(ABC):
         pass
 
 
-def connect(*args, **kwargs):
+def connect() -> 'TConnection':
     try:
         class Connection(
             BaseModel.config['driver'],
@@ -70,11 +71,14 @@ def connect(*args, **kwargs):
         ):
             pass
 
-        connection = Connection(*args, **kwargs)
+        connection = Connection(
+            *BaseModel.config['url'][0],
+            **BaseModel.config['url'][1],
+        )
     except NotImplementedError:
         raise NotSupportDriverError(type(BaseModel.config['driver']))
     else:
         return connection
 
 
-
+TConnection = TypeVar('TConnection', bound=AbstractConnectionDriver)

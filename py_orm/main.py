@@ -18,7 +18,7 @@ import pydantic.main
 class ConfigDict(TypedDict):
     """Global config PY ORM"""
     driver: Type
-    url: str
+    url: Tuple[list, dict]
     migrate_files: str
 
 
