@@ -1,5 +1,5 @@
 from typing import (
-    Mapping,
+    TypedDict,
     Set,
     TypeVar,
     Optional,
@@ -7,13 +7,21 @@ from typing import (
     Any,
     Literal,
     Tuple,
+    NoReturn,
 )
 
 from pydantic import BaseModel as _BaseModel
 from pydantic.main import ModelMetaclass as _ModelMetaclass
 
 
+class ConfigDict(TypedDict):
+    driver: Any
+    url: str
+    migrate_files: str
+
+
 def is_type(_type: Any, type_name: Literal['Optional']) -> Tuple[bool, tuple]:
+    """Check annotations example <'List' (int,)>"""
     if hasattr(_type, '_name'):
         if getattr(_type, '_name') == type_name:
             return True, getattr(_type, '__args__')
@@ -23,6 +31,7 @@ def is_type(_type: Any, type_name: Literal['Optional']) -> Tuple[bool, tuple]:
 
 class ModelMetaclass(_ModelMetaclass):
     __py_orm__: Set['TBaseModel'] = set()
+    __config_py_orm__: ConfigDict
 
     def __new__(mcs, name, bases, namespace, **kwargs):
         _base_model: _BaseModel = super().__new__(
@@ -49,6 +58,10 @@ class ModelMetaclass(_ModelMetaclass):
 class BaseModel(_BaseModel, metaclass=ModelMetaclass):
     __py_orm__: Set['TBaseModel']
     __tabel_name__: Optional[Union[bool, str]]
+
+    @staticmethod
+    def set_config(config: ConfigDict) -> NoReturn:
+        BaseModel.__config_py_orm__ = config
 
 
 TBaseModel = TypeVar('TBaseModel', bound=BaseModel)

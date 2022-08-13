@@ -1,5 +1,5 @@
 from typer import Typer, echo
-from py_orm import __version__
+import py_orm
 
 
 app = Typer()
@@ -7,4 +7,4 @@ app = Typer()
 
 @app.command()
 def version():
-    echo(f'py_orm: {__version__}')
+    echo(f'{py_orm.__name__}: {py_orm.__version__}')
