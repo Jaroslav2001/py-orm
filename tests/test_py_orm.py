@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING, Dict, Union
+from typing import Optional, TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from pydantic.fields import ModelField
@@ -17,10 +17,18 @@ def test_base_orm():
 
 def test_create_class():
     class User(BaseModel):
-        id: Optional[int] = Field(..., primary_key=True)
+        id: Optional[int] = Field(None, primary_key=True)
         name: str
 
-    a: Dict[str, 'ModelField'] = User.__fields__
+    class Phone(BaseModel):
+        id: Optional[int] = Field(None, primary_key=True)
+        number: str
+        user: None
+
+    a = User(name='Lol')
+
+    x: Dict[str, 'ModelField'] = User.__fields__
     b = getattr(User.__annotations__['id'], '__args__')
     c = User.__annotations__['id']._name
+
     assert User == User

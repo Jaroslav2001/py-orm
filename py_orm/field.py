@@ -11,6 +11,7 @@ class FieldInfo(_FieldInfo):
     __slots__ = _FieldInfo.__slots__ + (
         'length',
         'primary_key',
+        'foreign_key',
         'unique',
         'index',
         'auto_increment',
@@ -21,6 +22,7 @@ class FieldInfo(_FieldInfo):
         self.length = kwargs.pop('length')
         self.auto_increment = kwargs.pop('auto_increment')
         self.primary_key = kwargs.pop('primary_key')
+        self.foreign_key = kwargs.pop('foreign_key')
         self.unique = kwargs.pop('unique')
         self.index = kwargs.pop('index')
         self.nullable = None
@@ -34,6 +36,7 @@ def Field(
     *,
     length: Union[int, Tuple[int, int], None] = None,
     primary_key: bool = False,
+    foreign_key: bool = False,
     unique: bool = False,
     index: bool = False,
     auto_increment: bool = False,
@@ -66,6 +69,7 @@ def Field(
         default,
         length=length,
         primary_key=primary_key,
+        foreign_key=foreign_key,
         unique=unique,
         index=index,
         auto_increment=auto_increment,

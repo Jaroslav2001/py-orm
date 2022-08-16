@@ -1,6 +1,9 @@
-from typing import TypedDict
+from .abstract import DialectSQL
 
 
-sqlite = {
-
+sqlite: DialectSQL = {
+    'schema_table': '',
+    'create_table': 'CREATE TABLE',
+    'alter_table': 'ALTER TABLE',
+    'drop_table': 'DROP TABLE',
 }

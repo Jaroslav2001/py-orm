@@ -9,13 +9,17 @@ from typing import (
     NoReturn,
 )
 
-from pydantic import BaseModel as _BaseModel
+from pydantic import (
+    BaseModel as _BaseModel,
+)
 import pydantic.main
 
 from setting import ConfigDict
 
 
-def is_type(_type: Any, type_name: Literal['Optional']) -> Tuple[bool, tuple]:
+def is_type(_type: Any, type_name: Literal[
+    'Optional', 'Union'
+]) -> Tuple[bool, tuple]:
     """Check annotations example <'List' (int,)>"""
     if hasattr(_type, '_name'):
         if getattr(_type, '_name') == type_name:
