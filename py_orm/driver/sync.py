@@ -65,21 +65,23 @@ class AbstractCursorDriver(ABC):
         ...
 
 
+class Cursor(
+    BaseModel.__config_py_orm__['driver'][1],
+    AbstractCursorDriver
+):
+    pass
+
+
+class Connection(
+    BaseModel.__config_py_orm__['driver'][0],
+    AbstractConnectionDriver
+):
+    def cursor(self, factory=Cursor) -> 'TCursor':
+        return super().cursor(factory=factory)
+
+
 def connect() -> 'TConnection':
     try:
-        class Cursor(
-            BaseModel.__config_py_orm__['driver'][1],
-            AbstractCursorDriver
-        ):
-            pass
-
-        class Connection(
-            BaseModel.__config_py_orm__['driver'][0],
-            AbstractConnectionDriver
-        ):
-            def cursor(self, factory=Cursor) -> 'TCursor':
-                return super().cursor(factory=factory)
-
         connection = Connection(
             *BaseModel.__config_py_orm__['connect'][0],
             **BaseModel.__config_py_orm__['connect'][1],
