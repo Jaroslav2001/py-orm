@@ -8,7 +8,7 @@ app = Typer()
 
 
 @app.command()
-def init(import_: str):
+def init():
     pass
 
 

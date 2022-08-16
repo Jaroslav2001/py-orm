@@ -1,24 +1,17 @@
-from typing import TypedDict, NoReturn, Type
+from typing import (
+    TYPE_CHECKING,
+    TypedDict,
+    Tuple,
+    Union,
+    Any,
+)
+
+if TYPE_CHECKING:
+    from .driver.sync import TConnection, TCursor
 
 
-class Setting(TypedDict):
-    driver: str
-    url: str
-    default_type_id: Type
-
-
-setting: Setting
-
-
-def set_setting(
-    driver: str,
-    url: str,
-    *,
-    default_type_id: Type = int,
-) -> NoReturn:
-    global setting
-    setting: Setting = {
-        'driver': driver,
-        'url': url,
-        'default_type_id': default_type_id,
-    }
+class ConfigDict(TypedDict):
+    """Global config PY ORM"""
+    driver: Tuple[Union['TConnection', Any], Union['TCursor', Any]]
+    connect: Tuple[list, dict]
+    migrate_dir: str

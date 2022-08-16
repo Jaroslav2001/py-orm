@@ -1,6 +1,4 @@
 from typing import (
-    TYPE_CHECKING,
-    TypedDict,
     Set,
     TypeVar,
     Optional,
@@ -9,22 +7,12 @@ from typing import (
     Literal,
     Tuple,
     NoReturn,
-    Type,
 )
 
 from pydantic import BaseModel as _BaseModel
 import pydantic.main
 
-
-if TYPE_CHECKING:
-    from driver.sync import TConnection, TCursor
-
-
-class ConfigDict(TypedDict):
-    """Global config PY ORM"""
-    driver: Tuple[Union['TConnection', Any], Union['TCursor', Any]]
-    connect: Tuple[list, dict]
-    migrate_dir: str
+from setting import ConfigDict
 
 
 def is_type(_type: Any, type_name: Literal['Optional']) -> Tuple[bool, tuple]:
