@@ -1,4 +1,5 @@
 from typing import (
+    TYPE_CHECKING,
     TypedDict,
     Callable,
     Type,
@@ -9,7 +10,8 @@ from typing import (
     Optional,
 )
 
-from py_orm.migrations.migrations_model import MigrationsModel
+if TYPE_CHECKING:
+    from py_orm.migrations.migrations_model import MigrationsModel
 
 
 TType = TypeVar('TType', bound=Type)

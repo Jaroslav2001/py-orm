@@ -1,8 +1,9 @@
-from typing import Type, Union, Tuple
+from typing import TYPE_CHECKING
 
 from .abstract import DialectSQL, ConvertType
 
-from py_orm.migrations.migrations_model import MigrationsModel
+if TYPE_CHECKING:
+    from py_orm.migrations.migrations_model import MigrationsModel
 
 
 def schema_parsing() -> 'MigrationsModel':

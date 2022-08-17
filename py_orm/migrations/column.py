@@ -3,7 +3,7 @@ from typing import Union, Tuple
 from pydantic import BaseModel as _BaseModel
 
 
-from attribute import Attribute
+from .attribute import Attribute
 
 
 class Column(_BaseModel):

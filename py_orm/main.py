@@ -1,7 +1,6 @@
 from typing import (
     Set,
     TypeVar,
-    Optional,
     Union,
     Any,
     Literal,
@@ -34,6 +33,13 @@ class ModelMetaclass(pydantic.main.ModelMetaclass):
     __config_py_orm__: ConfigDict
 
     def __new__(mcs, name, bases, namespace, **kwargs):
+
+        if '__tabel_name__' in namespace:
+            _name_table = namespace.get('__tabel_name__')
+            if isinstance(_name_table, bool):
+                if _name_table:
+                    namespace['__tabel_name__'] = name
+
         _base_model: _BaseModel = super().__new__(
             mcs,
             name,
@@ -41,14 +47,14 @@ class ModelMetaclass(pydantic.main.ModelMetaclass):
             namespace,
             **kwargs,
         )
-        if '__tabel_name__' in namespace:
-            _name_table = namespace.get('__tabel_name__')
-            if isinstance(_name_table, bool):
-                if _name_table:
-                    namespace['__tabel_name__'] = name
-                    _name_table = name
-            if isinstance(_name_table, str):
+
+        if hasattr(_base_model, '__tabel_name__'):
+            if isinstance(getattr(_base_model, '__tabel_name__'), str):
                 mcs.__py_orm__.add(_base_model)
+            if isinstance(getattr(_base_model, '__tabel_name__'), bool):
+                if getattr(_base_model, '__tabel_name__'):
+                    mcs.__py_orm__.add(_base_model)
+
         return _base_model
 
 

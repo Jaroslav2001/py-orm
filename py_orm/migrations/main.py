@@ -23,9 +23,8 @@ def get_new_model() -> List[MigrationsModel]:
             name=model.__tabel_name__,
             columns=[]
         )
-        for column in model.fields:
+        for column in model.__fields__.values():
             column: ModelField
-
             # type check - is_type() is None and type
             type_ = None
             is_null = is_type(column.type_, 'Optional')
@@ -43,25 +42,34 @@ def get_new_model() -> List[MigrationsModel]:
             for i in dialect[BaseModel.__config_py_orm__['dialect']]['types']:
                 sql_type = i.type_python_to_sql(
                     value=type_,
-                    length=field_info.length,
+                    length=field_info.length if isinstance(field_info, FieldInfo) else None,
                 )
                 if isinstance(sql_type, str):
                     break
             sql_type: str
 
-            migration_model.columns.append(Column(
-                name=column.name,
-                type_=sql_type,
-                length=field_info.length,
-                attribute=Attribute(
-                    primary_key=field_info.primary_key,
-                    foreign_key=field_info.foreign_key,
-                    unique=field_info.unique,
-                    index=field_info.index,
-                    auto_increment=field_info.auto_increment,
-                    null=is_null[0],
-                ),
-            ))
+            if isinstance(field_info, FieldInfo):
+                migration_model.columns.append(Column(
+                    name=column.name,
+                    type_=sql_type,
+                    length=field_info.length,
+                    attribute=Attribute(
+                        primary_key=field_info.primary_key,
+                        foreign_key=field_info.foreign_key,
+                        unique=field_info.unique,
+                        index=field_info.index,
+                        auto_increment=field_info.auto_increment,
+                        null=is_null[0],
+                    ),
+                ))
+            else:
+                migration_model.columns.append(Column(
+                    name=column.name,
+                    type_=sql_type,
+                    attribute=Attribute(
+                        null=is_null[0],
+                    ),
+                ))
         new_model.append(
             migration_model
         )
@@ -94,9 +102,8 @@ def migrations():
                 new_model.__sql_drop_table__()
             )
         else:
-            pass
+            old_models.remove(delete_old_model)
             # alert __sql_alert_table__
-        old_models.remove(delete_old_model)
 
     for old_model in old_models:
         sql_migrate.append(
