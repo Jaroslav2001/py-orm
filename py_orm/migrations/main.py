@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from pydantic.fields import ModelField
 
@@ -77,11 +77,32 @@ def get_old_model() -> List[MigrationsModel]:
 def migrations():
     new_models = get_new_model()
     old_models = get_old_model()
+    sql_migrate: List[str] = []
+    sql_rollback: List[str] = []
 
     for new_model in new_models:
-        alert = False
+        delete_old_model: Optional[MigrationsModel] = None
         for old_model in old_models:
             if new_model.name == old_model.name:
-                alert = True
-        if not alert:
+                delete_old_model = old_model
+
+        if delete_old_model is None:
+            sql_migrate.append(
+                new_model.__sql_create_table__()
+            )
+            sql_rollback.append(
+                new_model.__sql_drop_table__()
+            )
+        else:
             pass
+            # alert __sql_alert_table__
+        old_models.remove(delete_old_model)
+
+    for old_model in old_models:
+        sql_migrate.append(
+            old_model.__sql_drop_table__()
+        )
+        sql_rollback.append(
+            old_model.__sql_create_table__()
+        )
+    return sql_migrate, sql_rollback

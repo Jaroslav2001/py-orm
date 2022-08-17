@@ -41,23 +41,20 @@ class ModelMetaclass(pydantic.main.ModelMetaclass):
             namespace,
             **kwargs,
         )
-
-        if hasattr(namespace, '__tabel_name__'):
-            _name_table = getattr(namespace, '__tabel_name__')
+        if '__tabel_name__' in namespace:
+            _name_table = namespace.get('__tabel_name__')
             if isinstance(_name_table, bool):
                 if _name_table:
-                    setattr(_base_model, '__tabel_name__', name)
-                    mcs.__py_orm__.add(_base_model)
+                    namespace['__tabel_name__'] = name
+                    _name_table = name
             if isinstance(_name_table, str):
-                setattr(_base_model, '__tabel_name__', name)
                 mcs.__py_orm__.add(_base_model)
-
         return _base_model
 
 
 class BaseModel(_BaseModel, metaclass=ModelMetaclass):
     __py_orm__: Set['TBaseModel']
-    __tabel_name__: Optional[Union[bool, str]]
+    __tabel_name__: Union[bool, str]
 
 
 def set_config(config: ConfigDict) -> NoReturn:
