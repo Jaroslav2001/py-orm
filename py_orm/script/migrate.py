@@ -120,8 +120,3 @@ def run():
 @app.command()
 def rollback():
     pass
-
-
-@app.callback(invoke_without_command=True)
-def callback():
-    pass
