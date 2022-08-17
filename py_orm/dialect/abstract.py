@@ -75,3 +75,10 @@ class DialectSQL(TypedDict):
         ConvertType[bool],
         ConvertType[bytes],
     ]
+    primary_key: str
+    foreign_key: str
+    unique: str
+    index: str
+    auto_increment: str
+    not_null: str
+

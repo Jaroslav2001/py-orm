@@ -36,7 +36,7 @@ def Field(
     *,
     length: Union[int, Tuple[int, int], None] = None,
     primary_key: bool = False,
-    foreign_key: bool = False,
+    foreign_key: Optional[str] = None,
     unique: bool = False,
     index: bool = False,
     auto_increment: bool = False,

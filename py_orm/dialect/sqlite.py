@@ -22,5 +22,12 @@ sqlite: DialectSQL = {
         ConvertType[str](str, 'TEXT'),
         ConvertType[bool](bool, 'INT'),
         ConvertType[bytes](bytes, 'BLOB'),
-    )
+    ),
+
+    'primary_key': 'PRIMARY KEY',
+    'foreign_key': 'foreign_key',
+    'unique': 'UNIQUE',
+    'index': 'INDEX',
+    'auto_increment': 'AUTOINCREMENT',
+    'not_null': 'NOT NULL',
 }

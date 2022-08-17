@@ -15,10 +15,8 @@ if TYPE_CHECKING:
     from py_orm.main import TBaseModel
 
 
-def migrations():
+def get_new_model() -> List[MigrationsModel]:
     new_model: List[MigrationsModel] = []
-    old_model: List[MigrationsModel] = []
-
     for model in BaseModel.__py_orm__:
         model: TBaseModel
         migration_model: MigrationsModel = MigrationsModel(
@@ -67,5 +65,23 @@ def migrations():
         new_model.append(
             migration_model
         )
+    return new_model
 
-    # Old models
+
+def get_old_model() -> List[MigrationsModel]:
+    old_model: List[MigrationsModel] = []
+    # create models
+    return old_model
+
+
+def migrations():
+    new_models = get_new_model()
+    old_models = get_old_model()
+
+    for new_model in new_models:
+        alert = False
+        for old_model in old_models:
+            if new_model.name == old_model.name:
+                alert = True
+        if not alert:
+            pass
