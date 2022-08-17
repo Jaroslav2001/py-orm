@@ -1,8 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Type
+from typing import TypeVar, Type, TYPE_CHECKING, Iterator
 
 from error import NotSupportDriverError
 from py_orm import BaseModel
+from .base import build_py_orm_model
+
+if TYPE_CHECKING:
+    from py_orm import Read
+    from py_orm.sql_builder.read import TModel, TSchema
 
 
 class AbstractConnectionDriver(ABC):
@@ -45,11 +50,11 @@ class AbstractCursorDriver(ABC):
         ...
 
     @abstractmethod
-    def execute(self, operation: str, *args, **kwargs):
+    def execute(self, sql: str, *args, **kwargs):
         ...
 
     @abstractmethod
-    def executemany(self, operation: str, *args, **kwargs):
+    def executemany(self, sql: str, *args, **kwargs):
         ...
 
     @abstractmethod
@@ -69,7 +74,9 @@ class Cursor(
     BaseModel.__config_py_orm__['driver'][1],
     AbstractCursorDriver
 ):
-    pass
+    def get_all(self, value: 'Read[TModel, TSchema]') -> Iterator['TSchema']:
+        self.execute(str(value))
+        return build_py_orm_model(value=value, data=self.fetchall())
 
 
 class Connection(
@@ -92,5 +99,5 @@ def connect() -> 'TConnection':
         return connection
 
 
-TConnection = TypeVar('TConnection', bound=AbstractConnectionDriver)
-TCursor = TypeVar('TCursor', bound=AbstractCursorDriver)
+TConnection = TypeVar('TConnection', bound=Connection)
+TCursor = TypeVar('TCursor', bound=Cursor)

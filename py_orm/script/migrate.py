@@ -4,7 +4,7 @@ import json
 from os.path import join
 from typing import TypedDict, Dict, Tuple
 
-from typer import Typer, confirm, echo
+from typer import Typer, confirm
 
 from py_orm import BaseModel
 from py_orm.migrations.main import migrations, execute
