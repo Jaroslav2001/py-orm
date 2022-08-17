@@ -7,6 +7,7 @@ from typing import (
     Literal,
     Tuple,
     NoReturn,
+    Type,
 )
 
 from pydantic import (
@@ -19,13 +20,13 @@ from setting import ConfigDict
 
 def is_type(_type: Any, type_name: Literal[
     'Optional', 'Union'
-]) -> Tuple[bool, tuple]:
+]) -> Tuple[bool, Tuple[Type, ...], Type]:
     """Check annotations example <'List' (int,)>"""
     if hasattr(_type, '_name'):
         if getattr(_type, '_name') == type_name:
-            return True, getattr(_type, '__args__')
-        return False, getattr(_type, '__args__')
-    return False, tuple()
+            return True, getattr(_type, '__args__'), getattr(_type, '_name')
+        return False, getattr(_type, '__args__'), getattr(_type, '_name')
+    return False, tuple(), _type
 
 
 class ModelMetaclass(pydantic.main.ModelMetaclass):

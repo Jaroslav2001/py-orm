@@ -4,6 +4,7 @@ from typing import (
     Tuple,
     Union,
     Any,
+    Literal,
 )
 
 if TYPE_CHECKING:
@@ -14,4 +15,5 @@ class ConfigDict(TypedDict):
     """Global config PY ORM"""
     driver: Tuple[Union['TConnection', Any], Union['TCursor', Any]]
     connect: Tuple[list, dict]
+    dialect: Union[str, Literal['sqlite', 'mysql', 'postgresql']]
     migrate_dir: str

@@ -2,7 +2,22 @@ import sqlite3
 
 from typer.testing import CliRunner
 
-from py_orm import set_config, py_orm_app, BaseModel, Field
+from py_orm import set_config, py_orm_app, BaseModel, Field, validator
+
+
+def test_convert_orm():
+    class User(BaseModel):
+        id: int
+        super_user: bool
+
+        @validator('super_user')
+        def convert(cls, v):
+            if not isinstance(v, bool):
+                return bool(v)
+            return v
+
+    a = User(id=1, super_user=1)
+    print(a)
 
 
 def test_schema_db():
@@ -13,6 +28,7 @@ def test_init_migrate():
     set_config(
         config={
             'driver': (sqlite3.Connection, sqlite3.Cursor),
+            'dialect': 'sqlite',
             'connect': ([':memory:'], {}),
             'migrate_dir': 'migrations',
         }

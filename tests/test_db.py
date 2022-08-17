@@ -10,6 +10,7 @@ def test_db():
         config={
             'driver': (sqlite3.Connection, sqlite3.Cursor),
             'connect': ([':memory:'], {}),
+            'dialect': 'sqlite',
             'migrate_dir': '',
         }
     )
