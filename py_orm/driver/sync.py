@@ -24,7 +24,7 @@ class AbstractConnectionDriver(ABC):
         ...
 
     @abstractmethod
-    def __enter__(self):
+    def __enter__(self) -> 'TCursor':
         ...
 
     @abstractmethod

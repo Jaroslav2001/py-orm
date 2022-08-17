@@ -2,7 +2,7 @@ import sqlite3
 
 from typer.testing import CliRunner
 
-from py_orm import set_config, py_orm_app, BaseModel, Field, validator
+from py_orm import set_config, py_orm_app, BaseModel, Field
 
 
 def test_schema_db():
@@ -16,6 +16,7 @@ def test_create_migrate():
             'dialect': 'sqlite',
             'connect': ([':memory:'], {}),
             'migrate_dir': 'migrations',
+            'async_': False,
         }
     )
 
@@ -25,7 +26,8 @@ def test_create_migrate():
 
     if "__main__" == __name__:
         runner = CliRunner()
-        runner.invoke(py_orm_app, ['migrate', 'create'])
+        runner.invoke(py_orm_app, ['migrate', 'create', '--yes'])
+
     from py_orm.driver.sync import connect, TCursor
     a = connect()
     c: TCursor = a.cursor()

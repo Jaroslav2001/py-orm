@@ -17,3 +17,4 @@ class ConfigDict(TypedDict):
     connect: Tuple[list, dict]
     dialect: Union[str, Literal['sqlite', 'mysql', 'postgresql']]
     migrate_dir: str
+    async_: bool

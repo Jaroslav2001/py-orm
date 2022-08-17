@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, NoReturn
 
 from pydantic.fields import ModelField
 
@@ -13,6 +13,20 @@ from .migrations_model import MigrationsModel
 
 if TYPE_CHECKING:
     from py_orm.main import TBaseModel
+
+
+def execute(sql: str, *args, **kwargs) -> NoReturn:
+    if BaseModel.__config_py_orm__['async_']:
+        # Create execute async_
+        pass
+    else:
+        from py_orm.driver.sync import connect, TConnection
+
+        with connect() as connect_:
+            connect_: TConnection
+            cursor = connect_.cursor()
+            cursor.execute(sql, *args, **kwargs)
+            connect_.commit()
 
 
 def get_new_model() -> List[MigrationsModel]:

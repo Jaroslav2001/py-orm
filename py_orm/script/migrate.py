@@ -2,12 +2,12 @@ import os
 import re
 import json
 from os.path import join
-from typing import TypedDict
+from typing import TypedDict, Dict, Tuple
 
 from typer import Typer, confirm, echo
 
 from py_orm import BaseModel
-from py_orm.migrations.main import migrations
+from py_orm.migrations.main import migrations, execute
 
 
 class MetadataFile(TypedDict):
@@ -18,8 +18,7 @@ class MetadataFile(TypedDict):
 app = Typer()
 
 
-@app.command()
-def create(yes: bool = False):
+def create_dir():
     if not (BaseModel.__config_py_orm__['migrate_dir'] in os.listdir(path=".")):
         os.mkdir(BaseModel.__config_py_orm__['migrate_dir'])
     if not ('py_orm.json' in os.listdir(path=BaseModel.__config_py_orm__['migrate_dir'])):
@@ -34,18 +33,36 @@ def create(yes: bool = False):
                 'number_migrate': 0,
             }, file)
 
-    migrate_files = os.listdir(path=BaseModel.__config_py_orm__['migrate_dir'])
 
-    migrate_run, migrate_rollback = migrations()
-
-    metadata_file: MetadataFile
+def get_metadata_file() -> MetadataFile:
     with open(
             join(
                 BaseModel.__config_py_orm__['migrate_dir'],
                 'py_orm.json')
             , 'r'
     ) as file:
-        metadata_file = json.load(file)
+        return json.load(file)
+
+
+def get_sql_file(number: int):
+    with open(
+            join(
+                BaseModel.__config_py_orm__['migrate_dir'],
+                f"{number}.sql"
+            ), 'r'
+    ) as file:
+        return file.read()
+
+
+@app.command()
+def create(yes: bool = False):
+    create_dir()
+
+    migrate_files = os.listdir(path=BaseModel.__config_py_orm__['migrate_dir'])
+
+    migrate_run, migrate_rollback = migrations()
+
+    metadata_file = get_metadata_file()
 
     if metadata_file['number_migrate'] < len(migrate_files) - 1 and not yes:
         abort = confirm(f"overwrite file <{metadata_file['number_file']}.sql>?", abort=True)
@@ -75,9 +92,36 @@ def create(yes: bool = False):
 
 @app.command()
 def run():
-    pass
+    metadata_file = get_metadata_file()
+
+    sql_commands: Tuple[str, ...] = re.search(
+        r"-- *(<(?:migrate|rollback) *\d+> *\n[\s\w(),]*;)",
+        get_sql_file(metadata_file['number_file'])
+    ).groups()
+
+    sql_commands_run: Dict[int, str] = {}
+    sql_commands_rollback: Dict[int, str] = {}
+
+    for sql_command in sql_commands:
+        sql_command = re.search(
+            r"<((?:migrate|rollback)) *(\d+)> *\n([\s\w(),]*;)",
+            sql_command
+        ).groups()
+
+        if sql_command[0] == 'migrate':
+            sql_commands_run[int(sql_command[1])] = sql_command[2]
+        if sql_command[0] == 'rollback':
+            sql_commands_rollback[int(sql_command[1])] = sql_command[2]
+
+        for sql in sql_commands_run.values():
+            execute(sql)
 
 
 @app.command()
 def rollback():
+    pass
+
+
+@app.callback(invoke_without_command=True)
+def callback():
     pass
