@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Type, TYPE_CHECKING, Iterator, List
+from typing import TypeVar, TYPE_CHECKING, Iterator, List
 
 from error import NotSupportDriverError
 from py_orm import BaseModel, TBaseModel
@@ -23,7 +23,7 @@ class AbstractConnectionDriver(ABC):
         ...
 
     @abstractmethod
-    def cursor(self, factory: Type['TCursor'] = 'TCursor') -> 'TCursor':
+    def cursor(self, *args, **kwargs) -> 'TCursor':
         ...
 
     @abstractmethod
@@ -67,11 +67,6 @@ class AbstractCursorDriver(ABC):
     def fetchall(self):
         ...
 
-
-class Cursor(
-    BaseModel.__config_py_orm__.driver[1],
-    AbstractCursorDriver
-):
     @staticmethod
     def _build_py_orm_model(
             value: 'Read[TBaseModel]',
@@ -87,24 +82,34 @@ class Cursor(
         self.execute(str(value))
         return self._build_py_orm_model(value=value, data=self.fetchall())
 
+# ========================== sqlite ===============================================
 
-class Connection(
-    BaseModel.__config_py_orm__.driver[0],
-    AbstractConnectionDriver
-):
-    def cursor(self, factory=Cursor) -> 'TCursor':
-        return super().cursor(factory=factory)
+
+if 'sqlite3' == BaseModel.__config_py_orm__.driver:
+    from sqlite3 import (
+        Connection as _Connection,
+        Cursor as _Cursor,
+    )
+
+    class Cursor(_Cursor, AbstractCursorDriver):
+        pass
+
+
+    class Connection(_Connection, AbstractConnectionDriver):
+        def cursor(self, **kwargs) -> 'TCursor':
+            return super().cursor(factory=Cursor)
+
+
+# ========================== NotSupportDriverError ===============================================
+else:
+    raise NotSupportDriverError
 
 
 def connect() -> 'TConnection':
-    try:
-        connection = Connection(
-            BaseModel.__config_py_orm__.database,
-        )
-    except NotImplementedError:
-        raise NotSupportDriverError(type(BaseModel.__config_py_orm__['driver']))
+    if 'sqlite3' == BaseModel.__config_py_orm__.driver:
+        return Connection(BaseModel.__config_py_orm__.database)
     else:
-        return connection
+        raise NotSupportDriverError
 
 
 TConnection = TypeVar('TConnection', bound=Connection)

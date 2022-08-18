@@ -1,20 +1,11 @@
 from typing import (
-    TYPE_CHECKING,
-    Tuple,
-    Union,
     Literal,
     Optional,
-    Type,
 )
 
 from pydantic import BaseModel
 
-if TYPE_CHECKING:
-    from .driver.sync import TConnection, TCursor
-    from .driver.async_ import (
-        TConnection as TConnectionAsync,
-        TCursor as TCursorAsync,
-    )
+from py_orm.driver.init import Driver
 
 
 class Config(BaseModel):
@@ -24,10 +15,7 @@ class Config(BaseModel):
 
 class ConfigFull(Config):
     # auto config
-    driver: Tuple[
-        Union[Type['TConnection'], Type['TConnectionAsync'], Type],
-        Union[Type['TCursor'], Type['TCursorAsync'], Type]
-    ]
+    driver: Driver
     dialect: Literal['sqlite', 'mysql', 'postgresql']
     async_: bool
 
