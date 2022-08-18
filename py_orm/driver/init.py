@@ -1,7 +1,7 @@
 from typing import (
     Literal,
     TypeAlias,
-    List,
+    List, Optional,
 )
 
 Driver: TypeAlias = Literal[
@@ -18,8 +18,9 @@ AsyncDriver: TypeAlias = Literal["asyncpg", "aiomysql", "aiosqlite"]
 async_drivers: List[AsyncDriver] = ["asyncpg", "aiomysql", "aiosqlite"]
 
 
-def is_async(driver: Driver) -> bool:
+def is_async(driver: Driver) -> Optional[bool]:
     if driver in async_drivers:
         return False
     if driver in sync_drivers:
         return True
+    return None

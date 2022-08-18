@@ -1,4 +1,4 @@
-from typing import Dict, Literal, Union, TYPE_CHECKING, TypeAlias
+from typing import Dict, Literal, Tuple, TYPE_CHECKING, TypeAlias
 
 from .abstract import DialectSQL
 from .sqlite import sqlite
@@ -12,8 +12,11 @@ dialect: Dict[DialectType, DialectSQL] = {
     'sqlite': sqlite,
 }
 
-default_driver: Dict[DialectType, 'Driver'] = {
-    'sqlite': 'sqlite3',
-    'mysql': 'pymysql',
-    'postgresql': 'psycopg2',
+default_driver: Dict[Tuple[DialectType, bool], 'Driver'] = {
+    ('sqlite', False): 'sqlite3',
+    ('mysql', False): 'pymysql',
+    ('postgresql', False): 'psycopg2',
+    ('sqlite', True): 'aiosqlite',
+    ('mysql', True): 'aiomysql',
+    ('postgresql', True): 'asyncpg',
 }

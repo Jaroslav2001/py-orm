@@ -17,7 +17,7 @@ from pydantic import (
 import pydantic.main
 
 from setting import Config, ConfigFull
-from dialect.main import default_driver, DialectType
+from dialect.main import DialectType
 from py_orm.driver.init import is_async, Driver
 
 
@@ -70,14 +70,14 @@ class BaseModel(_BaseModel, metaclass=ModelMetaclass):
 
 
 def set_config(config: Config) -> NoReturn:
-    driver_name_: Driver
+    driver_name_: Optional[Driver]
     connect = re.search(
         r"^(\w*)\+?(\w*):\/\/(.*)$",
         config.url
     ).groups()
     dialect: DialectType = connect[0]
     if connect[1] == '':
-        driver_name_ = default_driver[dialect]
+        driver_name_ = None
     else:
         driver_name_ = connect[1]
     connect = connect[2]

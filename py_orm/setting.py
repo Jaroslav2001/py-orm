@@ -15,9 +15,9 @@ class Config(BaseModel):
 
 class ConfigFull(Config):
     # auto config
-    driver: Driver
+    driver: Optional[Driver]
     dialect: Literal['sqlite', 'mysql', 'postgresql']
-    async_: bool
+    async_: Optional[bool]
 
     username: Optional[str]
     password: Optional[str]

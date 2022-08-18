@@ -3,6 +3,8 @@ from typing import TypeVar, TYPE_CHECKING, Iterator, List
 
 from error import NotSupportDriverError
 from py_orm import BaseModel, TBaseModel
+from dialect.main import default_driver
+
 
 if TYPE_CHECKING:
     from py_orm import Read
@@ -32,10 +34,6 @@ class AbstractConnectionDriver(ABC):
 
     @abstractmethod
     def __exit__(self):
-        ...
-
-    @abstractmethod
-    def __init__(self, *args, **kwargs):
         ...
 
 
@@ -82,7 +80,15 @@ class AbstractCursorDriver(ABC):
         self.execute(str(value))
         return self._build_py_orm_model(value=value, data=self.fetchall())
 
-# ========================== sqlite ===============================================
+
+if BaseModel.__config_py_orm__.driver is None:
+    BaseModel.__config_py_orm__.driver = default_driver[(
+        BaseModel.__config_py_orm__.dialect,
+        False,
+    )]
+    BaseModel.__config_py_orm__.async_ = False
+
+# ========================== sqlite3 ===============================================
 
 
 if 'sqlite3' == BaseModel.__config_py_orm__.driver:
