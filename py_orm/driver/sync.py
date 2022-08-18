@@ -1,13 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Type, TYPE_CHECKING, Iterator
+from typing import TypeVar, Type, TYPE_CHECKING, Iterator, List
 
 from error import NotSupportDriverError
-from py_orm import BaseModel
-from .base import build_py_orm_model
+from py_orm import BaseModel, TBaseModel
 
 if TYPE_CHECKING:
     from py_orm import Read
-    from py_orm.sql_builder.read import TModel, TSchema
 
 
 class AbstractConnectionDriver(ABC):
@@ -74,9 +72,20 @@ class Cursor(
     BaseModel.__config_py_orm__['driver'][1],
     AbstractCursorDriver
 ):
-    def get_all(self, value: 'Read[TModel, TSchema]') -> Iterator['TSchema']:
+    @staticmethod
+    def _build_py_orm_model(
+            value: 'Read[TBaseModel]',
+            data: List[tuple]
+    ) -> Iterator['TBaseModel']:
+        for column in data:
+            virtual_data = {}
+            for i, name in enumerate(value.columns):
+                virtual_data[name] = column[i]
+            yield value.model(**virtual_data)
+
+    def get_all(self, value: 'Read[TBaseModel]') -> Iterator[TBaseModel]:
         self.execute(str(value))
-        return build_py_orm_model(value=value, data=self.fetchall())
+        return self._build_py_orm_model(value=value, data=self.fetchall())
 
 
 class Connection(
