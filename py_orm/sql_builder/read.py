@@ -1,31 +1,24 @@
 from typing import TYPE_CHECKING, Generic, TypeVar, Type, List, Iterator, Optional
 
-from py_orm import BaseModel
+from py_orm import TBaseModel
 from .column import C
 from .sql_builder import SQLBuilder
 
-TModel = TypeVar('TModel', bound=BaseModel)
-TSchema = TypeVar('TSchema', bound=BaseModel)
 
-
-class Read(SQLBuilder, Generic[TModel, TSchema]):
-    db_model: Type[TModel]
-    schema_model: Type[TSchema]
+class Read(SQLBuilder, Generic[TBaseModel]):
+    model: Type[TBaseModel]
     columns: List[str]
-    value: TSchema
+    value: TBaseModel
     _where: Optional[C]
 
     def __init__(
             self,
-            db_model: Type[TModel],
-            schema_model: Type[TSchema],
+            model: Type[TBaseModel],
     ):
-        self.db_model = db_model
-        # add check insert_into.__tabel_name__ is Error
-        self.schema_model = schema_model
-        self.columns = list(schema_model.__fields__.keys())
-
+        self.model = model
+        # add check BaseModel.__tabel_name__ is Error
         self._where = None
+        self.columns = list(model.__fields__.keys())
 
     def where(self, value: C) -> 'Read':
         self._where = value
@@ -33,5 +26,5 @@ class Read(SQLBuilder, Generic[TModel, TSchema]):
 
     def __str__(self):
         return f"SELECT {', '.join(self.columns)} " \
-               f"FROM {self.db_model.__tabel_name__}" \
+               f"FROM {self.model.__tabel_model__.__tabel_name__}" \
                f"{'' if self._where is None else ' '+str(self._where)};"

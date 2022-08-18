@@ -7,6 +7,7 @@ from typing import (
     Tuple,
     NoReturn,
     Type,
+    Optional,
 )
 
 from pydantic import (
@@ -50,9 +51,11 @@ class ModelMetaclass(pydantic.main.ModelMetaclass):
 
         if hasattr(_base_model, '__tabel_name__'):
             if isinstance(getattr(_base_model, '__tabel_name__'), str):
+                _base_model.__tabel_model__ = _base_model
                 mcs.__py_orm__.add(_base_model)
             if isinstance(getattr(_base_model, '__tabel_name__'), bool):
                 if getattr(_base_model, '__tabel_name__'):
+                    _base_model.__tabel_model__ = _base_model
                     mcs.__py_orm__.add(_base_model)
 
         return _base_model
@@ -61,6 +64,7 @@ class ModelMetaclass(pydantic.main.ModelMetaclass):
 class BaseModel(_BaseModel, metaclass=ModelMetaclass):
     __py_orm__: Set['TBaseModel']
     __tabel_name__: Union[bool, str]
+    __tabel_model__: Optional['TBaseModel']
 
 
 def set_config(config: ConfigDict) -> NoReturn:

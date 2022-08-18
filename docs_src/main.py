@@ -1,14 +1,14 @@
 from sqlite3 import Connection, Cursor
 from typing import Optional
 
-from py_orm import set_config, BaseModel, Field, py_orm_app, Create, Read, C
+from py_orm import BaseModel, Field, Create, py_orm_app, set_config, Read, C
 
 set_config(
     config={
-        'connect': (['data.db'], {}),
+        'connect': (['lol.db'], {}),
         'driver': (Connection, Cursor),
         'dialect': 'sqlite',
-        'migrate_dir': 'migrate',
+        'migrate_dir': 'lol',
         'async_': False,
     }
 )
@@ -20,31 +20,32 @@ class UserBase(BaseModel):
 
 class UserDB(UserBase):
     __tabel_name__ = 'user'
-    id: Optional[int] = Field(..., primary_key=True, auto_increment=True)
+    id: Optional[int] = Field(primary_key=True, auto_increment=True)
 
 
 class UserCreate(UserBase):
-    pass
+    __tabel_model__ = UserDB
 
 
 class User(UserBase):
-    id: int
+    __tabel_model__ = UserDB
+    id: int = Field(primary_key=True, auto_increment=True)
 
 
 py_orm_app()
 
-if __name__ == '__main__':
-    from py_orm.driver.sync import connect
-    connect_ = connect()
-    cursor = connect_.cursor()
-    cursor.execute(
-        Create(UserDB, UserCreate).value(UserCreate(name='Lol'))
+
+from py_orm.driver.sync import connect
+connect_ = connect()
+cursor = connect_.cursor()
+cursor.execute(
+    Create(UserCreate).value(UserCreate(name='Lol'))
+)
+print(Create(UserCreate).value(UserCreate(name='Lol')))
+print(Read(User).where(C('id') == 1))
+print(list(
+    cursor.get_all(
+        Read(User).where(C('id') == 1)
     )
-    print(Create(UserDB, UserCreate).value(UserCreate(name='Lol')))
-    print(Read(UserDB, User).where(C('id') == 1))
-    print(list(
-        cursor.get_all(
-            Read(UserDB, User).where(C('id') == 1)
-        )
-    ))
-    connect_.commit()
+))
+connect_.commit()

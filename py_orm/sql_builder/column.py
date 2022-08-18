@@ -1,7 +1,9 @@
 from typing import Any
 
+from .sql_builder import SQLBuilder
 
-class C:
+
+class C(SQLBuilder):
     column: str
     comparison: str
     value: Any
@@ -14,32 +16,32 @@ class C:
 
     def __eq__(self, other):
         self.comparison = '=='
-        self.value = other
+        self.value = self.decorator_value(other)
         return self
 
     def __ne__(self, other):
         self.comparison = '!='
-        self.value = other
+        self.value = self.decorator_value(other)
         return self
 
     def __lt__(self, other):
         self.comparison = '<'
-        self.value = other
+        self.value = self.decorator_value(other)
         return self
 
     def __le__(self, other):
         self.comparison = '<='
-        self.value = other
+        self.value = self.decorator_value(other)
         return self
 
     def __gt__(self, other):
         self.comparison = '>'
-        self.value = other
+        self.value = self.decorator_value(other)
         return self
 
     def __ge__(self, other):
         self.comparison = '>='
-        self.value = other
+        self.value = self.decorator_value(other)
         return self
 
     def __str__(self):

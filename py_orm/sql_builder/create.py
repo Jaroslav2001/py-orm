@@ -1,37 +1,31 @@
-from typing import TYPE_CHECKING, Generic, TypeVar, Type, List, Iterator
+from typing import Generic, Type, List, Iterator
 
-from py_orm import BaseModel
+from py_orm import TBaseModel
 from .sql_builder import SQLBuilder
 
-TModel = TypeVar('TModel', bound=BaseModel)
-TSchema = TypeVar('TSchema', bound=BaseModel)
 
-
-class Create(SQLBuilder, Generic[TModel, TSchema]):
-    db_model: Type[TModel]
-    schema_model: Type[TSchema]
+class Create(SQLBuilder, Generic[TBaseModel]):
+    model: Type[TBaseModel]
     columns: List[str]
-    value: TSchema
+    value: TBaseModel
 
     def __init__(
             self,
-            db_model: Type[TModel],
-            schema_model: Type[TSchema],
+            model: Type[TBaseModel],
     ):
-        self.db_model = db_model
-        # add check insert_into.__tabel_name__ is Error
-        self.schema_model = schema_model
-        self.columns = list(schema_model.__fields__.keys())
+        self.model = model
+        # add check BaseModel.__tabel_name__ is Error
+        self.columns = list(model.__fields__.keys())
 
-    def _value(self, value: TSchema) -> str:
+    def _value(self, value: TBaseModel) -> str:
         return f"({', '.join(self.decorator_value(getattr(value, x)) for x in self.columns)})"
 
-    def value(self, value: TSchema) -> str:
-        return f"INSERT INTO {self.db_model.__tabel_name__} "\
+    def value(self, value: TBaseModel) -> str:
+        return f"INSERT INTO {self.model.__tabel_model__.__tabel_name__} "\
             f"({', '.join(self.columns)}) VALUES "\
             f"{self._value(value)};"
 
-    def values(self, values: Iterator[TSchema]) -> str:
-        return f"INSERT INTO {self.db_model.__tabel_name__} " \
+    def values(self, values: Iterator[TBaseModel]) -> str:
+        return f"INSERT INTO {self.model.__tabel_model__.__tabel_name__} " \
             f"({', '.join(self.columns)}) VALUES " \
             f"{', '.join(self._value(x) for x in values)};"
