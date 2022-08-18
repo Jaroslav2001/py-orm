@@ -69,7 +69,7 @@ class AbstractCursorDriver(ABC):
 
 
 class Cursor(
-    BaseModel.__config_py_orm__['driver'][1],
+    BaseModel.__config_py_orm__.driver[1],
     AbstractCursorDriver
 ):
     @staticmethod
@@ -89,7 +89,7 @@ class Cursor(
 
 
 class Connection(
-    BaseModel.__config_py_orm__['driver'][0],
+    BaseModel.__config_py_orm__.driver[0],
     AbstractConnectionDriver
 ):
     def cursor(self, factory=Cursor) -> 'TCursor':
@@ -99,8 +99,7 @@ class Connection(
 def connect() -> 'TConnection':
     try:
         connection = Connection(
-            *BaseModel.__config_py_orm__['connect'][0],
-            **BaseModel.__config_py_orm__['connect'][1],
+            BaseModel.__config_py_orm__.database,
         )
     except NotImplementedError:
         raise NotSupportDriverError(type(BaseModel.__config_py_orm__['driver']))

@@ -1,2 +1,2 @@
-from .main import dialect, add_dialect
+from .main import dialect
 from .abstract import DialectSQL

@@ -1,20 +1,38 @@
 from typing import (
     TYPE_CHECKING,
-    TypedDict,
     Tuple,
     Union,
-    Any,
     Literal,
+    Optional,
+    Type,
 )
+
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from .driver.sync import TConnection, TCursor
+    from .driver.async_ import (
+        TConnection as TConnectionAsync,
+        TCursor as TCursorAsync,
+    )
 
 
-class ConfigDict(TypedDict):
-    """Global config PY ORM"""
-    driver: Tuple[Union['TConnection', Any], Union['TCursor', Any]]
-    connect: Tuple[list, dict]
-    dialect: Union[str, Literal['sqlite', 'mysql', 'postgresql']]
+class Config(BaseModel):
+    url: str
     migrate_dir: str
+
+
+class ConfigFull(Config):
+    # auto config
+    driver: Tuple[
+        Union[Type['TConnection'], Type['TConnectionAsync'], Type],
+        Union[Type['TCursor'], Type['TCursorAsync'], Type]
+    ]
+    dialect: Literal['sqlite', 'mysql', 'postgresql']
     async_: bool
+
+    username: Optional[str]
+    password: Optional[str]
+    host: Optional[str]
+    port: Optional[int]
+    database: str

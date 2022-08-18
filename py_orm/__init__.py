@@ -4,5 +4,6 @@ from .main import BaseModel, TBaseModel, set_config
 from .field import Field
 from .script.main import py_orm_app
 from .sql_builder import *
+from .setting import Config
 
 from pydantic import validator

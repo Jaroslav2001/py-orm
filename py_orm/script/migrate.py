@@ -21,9 +21,9 @@ app = Typer()
 def get_metadata_file() -> MetadataFile:
     with open(
             join(
-                BaseModel.__config_py_orm__['migrate_dir'],
-                'py_orm.json')
-            , 'r'
+                BaseModel.__config_py_orm__.migrate_dir,
+                'py_orm.json'
+            ), 'r'
     ) as file:
         return json.load(file)
 
@@ -31,17 +31,17 @@ def get_metadata_file() -> MetadataFile:
 def set_metadata_file(value: MetadataFile):
     with open(
             join(
-                BaseModel.__config_py_orm__['migrate_dir'],
-                'py_orm.json')
-            , 'w'
+                BaseModel.__config_py_orm__.migrate_dir,
+                'py_orm.json'
+            ), 'w'
     ) as file:
         json.dump(value, file)
 
 
 def create_dir():
-    if not (BaseModel.__config_py_orm__['migrate_dir'] in os.listdir(path=".")):
-        os.mkdir(BaseModel.__config_py_orm__['migrate_dir'])
-    if not ('py_orm.json' in os.listdir(path=BaseModel.__config_py_orm__['migrate_dir'])):
+    if not (BaseModel.__config_py_orm__.migrate_dir in os.listdir(path=".")):
+        os.mkdir(BaseModel.__config_py_orm__.migrate_dir)
+    if not ('py_orm.json' in os.listdir(path=BaseModel.__config_py_orm__.migrate_dir)):
         set_metadata_file(
             {
                 'number_file': 0,
@@ -53,7 +53,7 @@ def create_dir():
 def get_sql_file(number: int):
     with open(
             join(
-                BaseModel.__config_py_orm__['migrate_dir'],
+                BaseModel.__config_py_orm__.migrate_dir,
                 f"{number}.sql"
             ), 'r'
     ) as file:
@@ -64,7 +64,7 @@ def get_sql_file(number: int):
 def create(yes: bool = False):
     create_dir()
 
-    migrate_files = os.listdir(path=BaseModel.__config_py_orm__['migrate_dir'])
+    migrate_files = os.listdir(path=BaseModel.__config_py_orm__.migrate_dir)
 
     migrate_run, migrate_rollback = migrations()
 
@@ -77,7 +77,7 @@ def create(yes: bool = False):
 
     with open(
             join(
-                BaseModel.__config_py_orm__['migrate_dir'],
+                BaseModel.__config_py_orm__.migrate_dir,
                 f"{metadata_file['number_file']}.sql"
             ), 'w'
     ) as file:
@@ -124,7 +124,6 @@ def run():
 
         for sql in sql_commands_run.values():
             execute(sql)
-
 
 
 @app.command()

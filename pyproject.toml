@@ -32,11 +32,20 @@ asyncpg = ["asyncpg"]
 aiomysql = ["aiomysql"]
 aiosqlite = ["aiosqlite"]
 
+all_drivers = [
+    "pymysql", "psycopg2", "asyncpg", "aiomysql", "aiosqlite"
+]
+
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"
 mkdocs-material = "^8.3"
 
-aiosqlite = "^0.17"
+pymysql  = "^1.0"
+psycopg2  = "^2.9"
+
+asyncpg = "^0.26"
+aiomysql  = "^0.1"
+aiosqlite  = "^0.17"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
