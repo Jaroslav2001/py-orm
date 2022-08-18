@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "ORM pydantic"
 authors = ["Your Jaroslav jarlitvin@gmail.com"]
 readme = "README.md"
+homepage = "https://jaroslav2001.github.io/py-orm"
+documentation = "https://jaroslav2001.github.io/py-orm"
 
 [tool.poetry.scripts]
 py-orm = "py_orm.script.main:app"

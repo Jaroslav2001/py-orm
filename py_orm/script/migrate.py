@@ -18,22 +18,6 @@ class MetadataFile(TypedDict):
 app = Typer()
 
 
-def create_dir():
-    if not (BaseModel.__config_py_orm__['migrate_dir'] in os.listdir(path=".")):
-        os.mkdir(BaseModel.__config_py_orm__['migrate_dir'])
-    if not ('py_orm.json' in os.listdir(path=BaseModel.__config_py_orm__['migrate_dir'])):
-        with open(
-            join(
-                BaseModel.__config_py_orm__['migrate_dir'],
-                'py_orm.json')
-            , 'w'
-        ) as file:
-            json.dump({
-                'number_file': 0,
-                'number_migrate': 0,
-            }, file)
-
-
 def get_metadata_file() -> MetadataFile:
     with open(
             join(
@@ -42,6 +26,28 @@ def get_metadata_file() -> MetadataFile:
             , 'r'
     ) as file:
         return json.load(file)
+
+
+def set_metadata_file(value: MetadataFile):
+    with open(
+            join(
+                BaseModel.__config_py_orm__['migrate_dir'],
+                'py_orm.json')
+            , 'w'
+    ) as file:
+        json.dump(value, file)
+
+
+def create_dir():
+    if not (BaseModel.__config_py_orm__['migrate_dir'] in os.listdir(path=".")):
+        os.mkdir(BaseModel.__config_py_orm__['migrate_dir'])
+    if not ('py_orm.json' in os.listdir(path=BaseModel.__config_py_orm__['migrate_dir'])):
+        set_metadata_file(
+            {
+                'number_file': 0,
+                'number_migrate': 0,
+            }
+        )
 
 
 def get_sql_file(number: int):
@@ -64,7 +70,7 @@ def create(yes: bool = False):
 
     metadata_file = get_metadata_file()
 
-    if metadata_file['number_migrate'] < len(migrate_files) - 1 and not yes:
+    if metadata_file['number_file'] < len(migrate_files) - 1 and not yes:
         abort = confirm(f"overwrite file <{metadata_file['number_file']}.sql>?", abort=True)
         if not abort:
             return
@@ -83,6 +89,9 @@ def create(yes: bool = False):
 
         for i, sql_command in enumerate(migrate_rollback):
             file.write(f"-- <rollback {i}>\n{sql_command}\n\n")
+
+    metadata_file['number_file'] += 1
+    set_metadata_file(metadata_file)
 
 
 # Parsing sql migrate file
@@ -115,6 +124,7 @@ def run():
 
         for sql in sql_commands_run.values():
             execute(sql)
+
 
 
 @app.command()
