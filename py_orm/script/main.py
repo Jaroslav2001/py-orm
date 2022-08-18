@@ -1,3 +1,4 @@
+import sys
 from typer import Typer
 
 from . import info
@@ -11,10 +12,10 @@ app.add_typer(info.app, name='info')
 app.add_typer(migrate.app, name='migrate')
 
 
-@app.callback(invoke_without_command=True)
-def callback():
-    pass
+def py_orm_app():
+    if len(sys.argv) > 1:
+        app()
 
 
 if __name__ == '__main__':
-    app()
+    py_orm_app()

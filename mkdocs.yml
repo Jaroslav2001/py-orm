@@ -2,3 +2,24 @@ site_name: Py ORM
 
 theme:
   name: material
+
+nav:
+  - Py ORM: index.md
+  - Tutorial:
+      - tutorial/install.md
+      - tutorial/setting.md
+      - Model Py ORM:
+          - tutorial/model/index.md
+      - Migrations:
+          - tutorial/migrations/index.md
+      - Driver database:
+          - tutorial/driver/index.md
+      - CRUD operation:
+          - tutorial/crud/index.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
