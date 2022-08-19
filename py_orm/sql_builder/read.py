@@ -1,16 +1,15 @@
-from typing import Generic, Union
+from typing import Generic
 
 from py_orm import TBaseModel
-from .column import C
 from .template import T
 from .qwery import Qwery
 
 
 class Read(Qwery, Generic[TBaseModel]):
     value: TBaseModel
-    _where: Union[C, T]
+    _where: T
 
-    def where(self, value) -> 'Read':
+    def where(self, value: T) -> 'Read':
         self._where = value
         return self
 

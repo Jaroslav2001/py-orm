@@ -19,7 +19,6 @@ from py_orm import (
     py_orm_app,
     set_config,
     Read,
-    C,
     T,
     Config,
 )
@@ -64,7 +63,7 @@ def main():
     )
     print(create)
 
-    read_only: Read[User] = Read(User).where(C('id') == T('id'))
+    read_only: Read[User] = Read(User).where(T(c='id') == T('id'))
     print(read_only())
     print(read_only)
     cursor.exec_read(read_only, id=1)
@@ -73,7 +72,7 @@ def main():
             User
         )
     ))
-    read: Read[User] = Read(User).where(C('name') == T())
+    read: Read[User] = Read(User).where(T(c='name') == T())
     print(read())
     cursor.exec_read(read, 'Hello')
     print(list(
@@ -86,6 +85,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
 ```

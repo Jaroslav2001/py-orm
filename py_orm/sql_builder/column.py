@@ -1,47 +1,25 @@
+from typing import Optional
+
 from .sql_builder import SQLBuilder
-from .template import T
+from py_orm import TBaseModel
 
 
-class C(SQLBuilder):
+class Column(SQLBuilder):
     column: str
-    comparison: str
-    value: T
+    _table: TBaseModel
 
     def __init__(
             self,
-            column: str
+            column: str,
+            table: Optional[TBaseModel] = None,
     ):
         self.column = column
+        self._table = table
 
-    def __eq__(self, other: T):
-        self.comparison = '=='
-        self.value = other
-        return self
-
-    def __ne__(self, other: T):
-        self.comparison = '!='
-        self.value = other
-        return self
-
-    def __lt__(self, other: T):
-        self.comparison = '<'
-        self.value = other
-        return self
-
-    def __le__(self, other: T):
-        self.comparison = '<='
-        self.value = other
-        return self
-
-    def __gt__(self, other: T):
-        self.comparison = '>'
-        self.value = other
-        return self
-
-    def __ge__(self, other: T):
-        self.comparison = '>='
-        self.value = other
-        return self
+    def _is_table(self) -> str:
+        if self._table is None:
+            return ''
+        return f".{self._table.__tabel_model__.__tabel_name__}"
 
     def __sql__(self):
-        return f"WHERE {self.column} {self.comparison} {self.value()}"
+        return f"{self._is_table()}{self.column}"
