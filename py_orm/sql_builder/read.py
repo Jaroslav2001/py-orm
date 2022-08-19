@@ -1,30 +1,25 @@
-from typing import TYPE_CHECKING, Generic, TypeVar, Type, List, Iterator, Optional
+from typing import Generic, Union
 
 from py_orm import TBaseModel
 from .column import C
-from .sql_builder import SQLBuilder
+from .template import T
+from .qwery import Qwery
 
 
-class Read(SQLBuilder, Generic[TBaseModel]):
-    model: Type[TBaseModel]
-    columns: List[str]
+class Read(Qwery, Generic[TBaseModel]):
     value: TBaseModel
-    _where: Optional[C]
+    _where: Union[C, T]
 
-    def __init__(
-            self,
-            model: Type[TBaseModel],
-    ):
-        self.model = model
-        # add check BaseModel.__tabel_name__ is Error
-        self._where = None
-        self.columns = list(model.__fields__.keys())
-
-    def where(self, value: C) -> 'Read':
+    def where(self, value) -> 'Read':
         self._where = value
         return self
 
-    def __str__(self):
+    def _get_where(self) -> str:
+        if hasattr(self, '_where'):
+            return f" {self._where()}"
+        return ''
+
+    def __sql__(self) -> str:
         return f"SELECT {', '.join(self.columns)} " \
                f"FROM {self.model.__tabel_model__.__tabel_name__}" \
-               f"{'' if self._where is None else ' '+str(self._where)};"
+               f"{self._get_where()};"

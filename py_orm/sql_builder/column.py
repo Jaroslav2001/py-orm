@@ -1,12 +1,11 @@
-from typing import Any
-
 from .sql_builder import SQLBuilder
+from .template import T
 
 
 class C(SQLBuilder):
     column: str
     comparison: str
-    value: Any
+    value: T
 
     def __init__(
             self,
@@ -14,35 +13,35 @@ class C(SQLBuilder):
     ):
         self.column = column
 
-    def __eq__(self, other):
+    def __eq__(self, other: T):
         self.comparison = '=='
-        self.value = self.decorator_value(other)
+        self.value = other
         return self
 
-    def __ne__(self, other):
+    def __ne__(self, other: T):
         self.comparison = '!='
-        self.value = self.decorator_value(other)
+        self.value = other
         return self
 
-    def __lt__(self, other):
+    def __lt__(self, other: T):
         self.comparison = '<'
-        self.value = self.decorator_value(other)
+        self.value = other
         return self
 
-    def __le__(self, other):
+    def __le__(self, other: T):
         self.comparison = '<='
-        self.value = self.decorator_value(other)
+        self.value = other
         return self
 
-    def __gt__(self, other):
+    def __gt__(self, other: T):
         self.comparison = '>'
-        self.value = self.decorator_value(other)
+        self.value = other
         return self
 
-    def __ge__(self, other):
+    def __ge__(self, other: T):
         self.comparison = '>='
-        self.value = self.decorator_value(other)
+        self.value = other
         return self
 
-    def __str__(self):
-        return f"WHERE {self.column} {self.comparison} {self.value}"
+    def __sql__(self):
+        return f"WHERE {self.column} {self.comparison} {self.value()}"

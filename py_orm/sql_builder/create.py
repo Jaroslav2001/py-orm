@@ -1,31 +1,31 @@
-from typing import Generic, Type, List, Iterator
+from typing import Generic, List, Iterator, Type
 
 from py_orm import TBaseModel
-from .sql_builder import SQLBuilder
+from .qwery import Qwery
 
 
-class Create(SQLBuilder, Generic[TBaseModel]):
-    model: Type[TBaseModel]
-    columns: List[str]
-    value: TBaseModel
+class Create(Qwery, Generic[TBaseModel]):
+    values: List[TBaseModel]
 
     def __init__(
             self,
-            model: Type[TBaseModel],
+            value: Type[TBaseModel],
     ):
-        self.model = model
-        # add check BaseModel.__tabel_name__ is Error
-        self.columns = list(model.__fields__.keys())
+        self.values = []
+        super().__init__(value)
 
-    def _value(self, value: TBaseModel) -> str:
+    def _value_sql(self, value: TBaseModel) -> str:
         return f"({', '.join(self.decorator_value(getattr(value, x)) for x in self.columns)})"
 
-    def value(self, value: TBaseModel) -> str:
-        return f"INSERT INTO {self.model.__tabel_model__.__tabel_name__} "\
-            f"({', '.join(self.columns)}) VALUES "\
-            f"{self._value(value)};"
+    def __value__(self, value: TBaseModel) -> 'Create':
+        self.values.append(value)
+        return self
 
-    def values(self, values: Iterator[TBaseModel]) -> str:
+    def __values__(self, values: Iterator[TBaseModel]) -> 'Create':
+        self.values.extend(values)
+        return self
+
+    def __sql__(self) -> str:
         return f"INSERT INTO {self.model.__tabel_model__.__tabel_name__} " \
-            f"({', '.join(self.columns)}) VALUES " \
-            f"{', '.join(self._value(x) for x in values)};"
+               f"({', '.join(self.columns)}) VALUES " \
+               f"{', '.join(self._value_sql(x) for x in self.values)};"

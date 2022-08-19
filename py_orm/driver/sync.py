@@ -1,16 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, TYPE_CHECKING, Iterator, List
+from typing import TypeVar, Iterator, Type
 
-from error import NotSupportDriverError
-from py_orm import BaseModel, TBaseModel
+from error import NotSupportDriverError, CastingError
+from py_orm import BaseModel, TBaseModel, Read
 from dialect.main import default_driver
+from sql_builder import Create
+from .base import BaseConnectionDriver, BaseCursorDriver
 
 
-if TYPE_CHECKING:
-    from py_orm import Read
-
-
-class AbstractConnectionDriver(ABC):
+class AbstractConnectionDriver(BaseConnectionDriver, ABC):
     """PEP 249 - Python Database API Specification v2.0"""
     @abstractmethod
     def close(self):
@@ -37,7 +35,7 @@ class AbstractConnectionDriver(ABC):
         ...
 
 
-class AbstractCursorDriver(ABC):
+class AbstractCursorDriver(BaseCursorDriver, ABC):
     """PEP 249 - Python Database API Specification v2.0"""
     connection: 'TConnection'
 
@@ -65,20 +63,18 @@ class AbstractCursorDriver(ABC):
     def fetchall(self):
         ...
 
-    @staticmethod
-    def _build_py_orm_model(
-            value: 'Read[TBaseModel]',
-            data: List[tuple]
-    ) -> Iterator['TBaseModel']:
-        for column in data:
-            virtual_data = {}
-            for i, name in enumerate(value.columns):
-                virtual_data[name] = column[i]
-            yield value.model(**virtual_data)
+    def exec_create(self, __qwery: Create, __value: TBaseModel, *args: TBaseModel):
+        self.execute(__qwery.__value__(__value).__values__(args).__sql__())
 
-    def get_all(self, value: 'Read[TBaseModel]') -> Iterator[TBaseModel]:
-        self.execute(str(value))
-        return self._build_py_orm_model(value=value, data=self.fetchall())
+    def exec_read(self, __qwery: Read, *args, **kwargs):
+        args, kwargs = self._build_py_sql(*args, **kwargs)
+        self.execute(__qwery.__sql__().format(*args, **kwargs))
+
+    def get_all(self, value: Type[TBaseModel]) -> Iterator[TBaseModel]:
+        try:
+            return self._build_py_orm_model(value=value, data=self.fetchall())
+        except CastingError:
+            raise CastingError
 
 
 if BaseModel.__config_py_orm__.driver is None:

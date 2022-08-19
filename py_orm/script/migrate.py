@@ -85,13 +85,9 @@ def create(yes: bool = False):
             file.write(f"-- <migrate {i}>\n{sql_command}\n\n")
 
         file.write('\n')
-        migrate_rollback.reverse()
 
         for i, sql_command in enumerate(migrate_rollback):
             file.write(f"-- <rollback {i}>\n{sql_command}\n\n")
-
-    metadata_file['number_file'] += 1
-    set_metadata_file(metadata_file)
 
 
 # Parsing sql migrate file
@@ -124,6 +120,11 @@ def run():
 
         for sql in sql_commands_run.values():
             execute(sql)
+            metadata_file['number_migrate'] += 1
+
+        metadata_file['number_migrate'] = 0
+        metadata_file['number_file'] += 1
+        set_metadata_file(metadata_file)
 
 
 @app.command()

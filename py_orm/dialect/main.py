@@ -1,4 +1,11 @@
-from typing import Dict, Literal, Tuple, TYPE_CHECKING, TypeAlias
+from typing import (
+    Dict,
+    Any,
+    Tuple,
+    TYPE_CHECKING,
+    TypeAlias,
+    Literal,
+)
 
 from .abstract import DialectSQL
 from .sqlite import sqlite
@@ -20,3 +27,4 @@ default_driver: Dict[Tuple[DialectType, bool], 'Driver'] = {
     ('mysql', True): 'aiomysql',
     ('postgresql', True): 'asyncpg',
 }
+

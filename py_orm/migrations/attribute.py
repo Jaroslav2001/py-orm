@@ -15,16 +15,16 @@ class Attribute(_BaseModel):
     null: bool = True
 
     def __sql__(self) -> str:
-        _dialect = dialect[BaseModel.__config_py_orm__['dialect']]
+        _dialect = dialect[BaseModel.__config_py_orm__.dialect]
         _content = []
         if self.primary_key:
-            _content.append(_dialect['primary_key'])
+            _content.append(_dialect.primary_key)
         if self.unique:
-            _content.append(_dialect['unique'])
+            _content.append(_dialect.unique)
         if self.index:
-            _content.append(_dialect['index'])
+            _content.append(_dialect.index)
         if self.auto_increment:
-            _content.append(_dialect['auto_increment'])
+            _content.append(_dialect.auto_increment)
         if not self.null:
-            _content.append(_dialect['not_null'])
+            _content.append(_dialect.not_null)
         return ' '.join(_content)
