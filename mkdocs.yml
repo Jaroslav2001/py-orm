@@ -5,6 +5,7 @@ theme:
 
 nav:
   - Py ORM: index.md
+  - Fast start: fast_start.md
   - Tutorial:
       - tutorial/install.md
       - tutorial/setting.md

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Iterator, Type
+from typing import TypeVar, Iterator
 
-from error import NotSupportDriverError, CastingError
+from error import NotSupportDriverError
 from py_orm import BaseModel, TBaseModel, Read
 from dialect.main import default_driver
 from sql_builder import Create
@@ -63,18 +63,13 @@ class AbstractCursorDriver(BaseCursorDriver, ABC):
     def fetchall(self):
         ...
 
-    def exec_create(self, __qwery: Create, __value: TBaseModel, *args: TBaseModel):
+    def create(self, __qwery: Create, __value: TBaseModel, *args: TBaseModel):
         self.execute(__qwery.__value__(__value).__values__(args).__sql__())
 
-    def exec_read(self, __qwery: Read, *args, **kwargs):
+    def read_all(self, __qwery: Read, *args, **kwargs) -> Iterator[TBaseModel]:
         args, kwargs = self._build_py_sql(*args, **kwargs)
         self.execute(__qwery.__sql__().format(*args, **kwargs))
-
-    def get_all(self, value: Type[TBaseModel]) -> Iterator[TBaseModel]:
-        try:
-            return self._build_py_orm_model(value=value, data=self.fetchall())
-        except CastingError:
-            raise CastingError
+        return self._build_py_orm_model(value=__qwery.model, data=self.fetchall())
 
 
 if BaseModel.__config_py_orm__.driver is None:
