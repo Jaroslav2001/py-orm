@@ -6,18 +6,6 @@ from .value import Value
 from .operator import Operator
 
 
-def add_(__left: 'T', __right: 'T') -> 'T':
-    return __left.and_(__right)
-
-
-def or_(__left: 'T', __right: 'T') -> 'T':
-    return __left.or_(__right)
-
-
-def not_(__value: 'T') -> 'T':
-    return T(op='NOT').add_t(__value)
-
-
 class T(SQLBuilder):
     left: Optional['T']
     value: Union[Column, Template, Value, Operator]
@@ -30,14 +18,15 @@ class T(SQLBuilder):
             *,
             c: Optional[str] = None,
             v: Optional[Any] = None,
-            op: Optional[str] = None
+            t: Optional[str] = None,
     ):
         if not(c is None):
             name = Column(c)
         elif not(v is None):
             name = Value(v)
-        elif not (op is None):
-            name = Operator(op)
+        elif not(t is None):
+            name = Operator(t)
+
         elif name is None:
             name = ''
         if isinstance(name, str):
@@ -50,31 +39,31 @@ class T(SQLBuilder):
         self.max_right = self
 
     def __eq__(self, other: 'T') -> 'T':
-        return self.add_t(T(op='=='), other)
+        return self.add_t(T(t='=='), other)
 
     def __ne__(self, other: 'T') -> 'T':
-        return self.add_t(T(op='!='), other)
+        return self.add_t(T(t='!='), other)
 
     def __lt__(self, other: 'T') -> 'T':
-        return self.add_t(T(op='<'), other)
+        return self.add_t(T(t='<'), other)
 
     def __le__(self, other: 'T') -> 'T':
-        return self.add_t(T(op='<='), other)
+        return self.add_t(T(t='<='), other)
 
     def __gt__(self, other: 'T') -> 'T':
-        return self.add_t(T(op='>'), other)
+        return self.add_t(T(t='>'), other)
 
     def __ge__(self, other: 'T') -> 'T':
-        return self.add_t(T(op='>='), other)
+        return self.add_t(T(t='>='), other)
 
     def and_(self, other: 'T') -> 'T':
-        return self.add_t(T(op='AND'), other)
+        return self.add_t(T(t='AND'), other)
 
     def or_(self, other: 'T') -> 'T':
-        return self.add_t(T(op='OR'), other)
+        return self.add_t(T(t='OR'), other)
 
     def not_(self, other: 'T') -> 'T':
-        return self.add_t(T(op='NOT'), other)
+        return self.add_t(T(t='NOT'), other)
 
     def add_t(self, *args: 'T') -> 'T':
         for __right in args:
@@ -94,3 +83,20 @@ class T(SQLBuilder):
             return self.value()
         else:
             return f"{self.value()} {self.right.__sql__()}"
+
+
+NULL = T(t='NULL')
+NOT_NULL = T(t='NOT_NULL')
+NOT = T(t='NOT')
+
+
+def add_(__left: 'T', __right: 'T') -> 'T':
+    return __left.and_(__right)
+
+
+def or_(__left: 'T', __right: 'T') -> 'T':
+    return __left.or_(__right)
+
+
+def not_(__value: 'T') -> 'T':
+    return NOT.add_t(__value)

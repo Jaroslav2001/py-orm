@@ -26,9 +26,15 @@ class BaseCursorDriver:
         args = list(args)
 
         for i, j in enumerate(args):
-            args[i] = __types[type(j)].python_sql(j)
+            if j is None:
+                args[i] = dialect[BaseModel.__config_py_orm__.dialect].null
+            else:
+                args[i] = __types[type(j)].python_sql(j)
 
         for i, j in kwargs.items():
-            kwargs[i] = __types[type(j)].python_sql(j)
+            if j is None:
+                kwargs[i] = dialect[BaseModel.__config_py_orm__.dialect].null
+            else:
+                kwargs[i] = __types[type(j)].python_sql(j)
 
         return tuple(args), kwargs

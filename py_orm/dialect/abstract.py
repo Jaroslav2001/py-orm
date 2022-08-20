@@ -89,9 +89,7 @@ class ConvertType(Generic[TType]):
 
 
 class TypesConvert(_BaseModel):
-    __types__: Dict[Type, ConvertType] = {
-        None: ConvertType(None, 'NULL', lambda x: 'NULL')
-    }
+    __types__: Dict[Type, ConvertType] = {}
 
     int: ConvertType[int]
     float: ConvertType[float]
