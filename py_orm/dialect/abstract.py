@@ -89,7 +89,9 @@ class ConvertType(Generic[TType]):
 
 
 class TypesConvert(_BaseModel):
-    __types__: Dict[Type, ConvertType] = {}
+    __types__: Dict[Type, ConvertType] = {
+        None: ConvertType(None, 'NULL', lambda x: 'NULL')
+    }
 
     int: ConvertType[int]
     float: ConvertType[float]
@@ -118,3 +120,4 @@ class DialectSQL(_BaseModel):
     index: str
     auto_increment: str
     not_null: str
+    null: str

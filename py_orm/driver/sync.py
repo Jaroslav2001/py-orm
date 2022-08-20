@@ -63,10 +63,10 @@ class AbstractCursorDriver(BaseCursorDriver, ABC):
     def fetchall(self):
         ...
 
-    def create(self, __qwery: Create, __value: TBaseModel, *args: TBaseModel):
+    def create(self, __qwery: Create[TBaseModel], __value: TBaseModel, *args: TBaseModel):
         self.execute(__qwery.__value__(__value).__values__(args).__sql__())
 
-    def read_all(self, __qwery: Read, *args, **kwargs) -> Iterator[TBaseModel]:
+    def read_all(self, __qwery: Read[TBaseModel], *args, **kwargs) -> Iterator[TBaseModel]:
         args, kwargs = self._build_py_sql(*args, **kwargs)
         self.execute(__qwery.__sql__().format(*args, **kwargs))
         return self._build_py_orm_model(value=__qwery.model, data=self.fetchall())

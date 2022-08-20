@@ -30,5 +30,7 @@ sqlite = DialectSQL(
     unique='UNIQUE',
     index='INDEX',
     auto_increment='AUTOINCREMENT',
+
     not_null='NOT NULL',
+    null='NULL',
 )

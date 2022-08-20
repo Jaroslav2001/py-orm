@@ -1,6 +1,3 @@
-from pydantic import ValidationError
-
-
 class PyORMError(Exception):
     pass
 
@@ -13,5 +10,5 @@ class NotLinkTableModel(PyORMError):
     pass
 
 
-class CastingError(PyORMError, ValidationError):
+class BinaryOperationError(PyORMError):
     pass

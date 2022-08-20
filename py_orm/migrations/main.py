@@ -53,7 +53,7 @@ def get_new_model() -> List[MigrationsModel]:
             field_info: FieldInfo = column.field_info
             sql_type: str = ''
 
-            for i in dialect[BaseModel.__config_py_orm__.dialect].__types__().values():
+            for i in dialect[BaseModel.__config_py_orm__.dialect].types.__types__.values():
                 sql_type = i.type_python_to_sql(
                     value=type_,
                     length=field_info.length if isinstance(field_info, FieldInfo) else None,
