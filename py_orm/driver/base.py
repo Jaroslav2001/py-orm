@@ -4,11 +4,11 @@ from dialect import dialect
 from py_orm import TBaseModel, BaseModel
 
 
-class BaseConnectionDriver:
-    pass
+class BaseDriver:
+    @staticmethod
+    def _join(values: str, parent: str):
+        return f"{parent.join(values)}"
 
-
-class BaseCursorDriver:
     @staticmethod
     def _build_py_orm_model(
             value: Type['TBaseModel'],
@@ -38,3 +38,11 @@ class BaseCursorDriver:
                 kwargs[i] = __types[type(j)].python_sql(j)
 
         return tuple(args), kwargs
+
+
+class BaseConnectionDriver(BaseDriver):
+    pass
+
+
+class BaseCursorDriver(BaseDriver):
+    pass

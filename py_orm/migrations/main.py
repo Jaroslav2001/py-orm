@@ -1,18 +1,63 @@
-from typing import TYPE_CHECKING, List, Optional, NoReturn
+import os
+import re
+from os.path import join
+import json
 
-from pydantic.fields import ModelField
+from typer import confirm
+
+from typing import NoReturn, TypedDict, Tuple
 
 from py_orm import BaseModel
-from py_orm.main import is_type
-from py_orm.field import FieldInfo
-from py_orm.dialect import dialect
+from sql_builder.migrate import Database
 
-from .attribute import Attribute
-from .column import Column
-from .migrations_model import MigrationsModel
+metadata: str = 'py_orm.json'
 
-if TYPE_CHECKING:
-    from py_orm.main import TBaseModel
+
+class MetadataFile(TypedDict):
+    number_file: int
+    number_migrate: int
+
+
+def get_metadata_file() -> MetadataFile:
+    with open(
+            join(
+                BaseModel.__config_py_orm__.migrate_dir,
+                metadata
+            ), 'r'
+    ) as file:
+        return json.load(file)
+
+
+def set_metadata_file(value: MetadataFile):
+    with open(
+            join(
+                BaseModel.__config_py_orm__.migrate_dir,
+                metadata
+            ), 'w'
+    ) as file:
+        json.dump(value, file)
+
+
+def create_dir():
+    if not (BaseModel.__config_py_orm__.migrate_dir in os.listdir(path=".")):
+        os.mkdir(BaseModel.__config_py_orm__.migrate_dir)
+    if not (metadata in os.listdir(path=BaseModel.__config_py_orm__.migrate_dir)):
+        set_metadata_file(
+            {
+                'number_file': 0,
+                'number_migrate': 0,
+            }
+        )
+
+
+def get_sql_file(number: int):
+    with open(
+            join(
+                BaseModel.__config_py_orm__.migrate_dir,
+                f"{number}.sql"
+            ), 'r'
+    ) as file:
+        return file.read()
 
 
 def execute(sql: str, *args, **kwargs) -> NoReturn:
@@ -29,101 +74,68 @@ def execute(sql: str, *args, **kwargs) -> NoReturn:
             connect_.commit()
 
 
-def get_new_model() -> List[MigrationsModel]:
-    new_model: List[MigrationsModel] = []
-    for model in BaseModel.__py_orm__:
-        model: TBaseModel
-        migration_model: MigrationsModel = MigrationsModel(
-            name=model.__tabel_name__,
-            columns=[]
-        )
-        for column in model.__fields__.values():
-            column: ModelField
-            # type check - is_type() is None and type
-            type_ = None
-            is_null = is_type(column.type_, 'Optional')
-            if is_null[0]:
-                for i in is_null[1]:
-                    if not(i is None):
-                        type_ = i
-            elif len(is_null[1]) == 0:
-                type_ = is_null[2]
+def create_sql_migrate(yes: bool):
+    create_dir()
 
-            # get sql type
-            field_info: FieldInfo = column.field_info
-            sql_type: str = ''
+    migrate_files = os.listdir(path=BaseModel.__config_py_orm__.migrate_dir)
 
-            for i in dialect[BaseModel.__config_py_orm__.dialect].types.__types__.values():
-                sql_type = i.type_python_to_sql(
-                    value=type_,
-                    length=field_info.length if isinstance(field_info, FieldInfo) else None,
-                )
-                if isinstance(sql_type, str):
-                    break
-            sql_type: str
+    metadata_file = get_metadata_file()
 
-            if isinstance(field_info, FieldInfo):
-                migration_model.columns.append(Column(
-                    name=column.name,
-                    type_=sql_type,
-                    length=field_info.length,
-                    attribute=Attribute(
-                        primary_key=field_info.primary_key,
-                        foreign_key=field_info.foreign_key,
-                        unique=field_info.unique,
-                        index=field_info.index,
-                        auto_increment=field_info.auto_increment,
-                        null=is_null[0],
-                    ),
-                ))
-            else:
-                migration_model.columns.append(Column(
-                    name=column.name,
-                    type_=sql_type,
-                    attribute=Attribute(
-                        null=is_null[0],
-                    ),
-                ))
-        new_model.append(
-            migration_model
-        )
-    return new_model
+    if metadata_file['number_file'] < len(migrate_files) - 1 and not yes:
+        abort = confirm(f"overwrite file <{metadata_file['number_file']}.sql>?", abort=True)
+        if not abort:
+            return
+
+    with open(
+            join(
+                BaseModel.__config_py_orm__.migrate_dir,
+                f"{metadata_file['number_file']}.sql"
+            ), 'w'
+    ) as file:
+        file.write(Database().__sql__())
 
 
-def get_old_model() -> List[MigrationsModel]:
-    old_model: List[MigrationsModel] = []
-    # create models
-    return old_model
+def migrate(rollback: bool = False):
+    mode = 'migrate'
+    if rollback:
+        mode = 'rollback'
 
+    metadata_file = get_metadata_file()
 
-def migrations():
-    new_models = get_new_model()
-    old_models = get_old_model()
-    sql_migrate: List[str] = []
-    sql_rollback: List[str] = []
+    sql_commands: Tuple[str, ...] = re.search(
+        r"--.*<start>\n([\w\s(),;-]*)--.*<end>",
+        get_sql_file(metadata_file['number_file'] - 1
+                     if rollback else
+                     metadata_file['number_file']
+                     )
+    ).groups()
 
-    for new_model in new_models:
-        delete_old_model: Optional[MigrationsModel] = None
-        for old_model in old_models:
-            if new_model.name == old_model.name:
-                delete_old_model = old_model
+    if rollback:
+        sql_commands = sql_commands[::-1]
 
-        if delete_old_model is None:
-            sql_migrate.append(
-                new_model.__sql_create_table__()
-            )
-            sql_rollback.append(
-                new_model.__sql_drop_table__()
-            )
+    for sql_command in sql_commands:
+        sql_command = re.search(
+            r"(--.*(?:migrate|rollback)\n[\w\s(),-]*;)\s(--.*(?:migrate|rollback)\n[\w\s(),-]*;)",
+            sql_command
+        ).groups()
+
+        for content in sql_command:
+            key, value = re.search(
+                r"--.*(migrate|rollback)\n([\w\s(),-]*;)",
+                content,
+            ).groups()
+
+            if key == mode:
+                execute(value)
+        if mode == 'migrate':
+            metadata_file['number_migrate'] += 1
         else:
-            old_models.remove(delete_old_model)
-            # alert __sql_alert_table__
+            metadata_file['number_migrate'] -= 1
 
-    for old_model in old_models:
-        sql_migrate.append(
-            old_model.__sql_drop_table__()
-        )
-        sql_rollback.append(
-            old_model.__sql_create_table__()
-        )
-    return sql_migrate, sql_rollback
+    metadata_file['number_migrate'] = 0
+    if mode == 'migrate':
+        metadata_file['number_file'] += 1
+    else:
+        metadata_file['number_file'] -= 1
+
+    set_metadata_file(metadata_file)

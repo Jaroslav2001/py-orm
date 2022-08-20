@@ -2,9 +2,16 @@ from abc import ABC, abstractmethod
 from typing import TypeVar, Iterator
 
 from error import NotSupportDriverError
-from py_orm import BaseModel, TBaseModel, Read
+from py_orm import BaseModel, TBaseModel
 from dialect.main import default_driver
-from sql_builder import Create
+
+from sql_builder import (
+    Create,
+    QwerySQL,
+    CreateOne,
+    Read,
+)
+
 from .base import BaseConnectionDriver, BaseCursorDriver
 
 
@@ -63,13 +70,24 @@ class AbstractCursorDriver(BaseCursorDriver, ABC):
     def fetchall(self):
         ...
 
-    def create(self, __qwery: Create[TBaseModel], __value: TBaseModel, *args: TBaseModel):
-        self.execute(__qwery.__value__(__value).__values__(args).__sql__())
+    def create_one(self, __qwery: QwerySQL[CreateOne[TBaseModel]], __value: TBaseModel):
+        self.execute(__qwery.__sql__.format(**__value.dict()))
 
-    def read_all(self, __qwery: Read[TBaseModel], *args, **kwargs) -> Iterator[TBaseModel]:
+    def create_all(self, __qwery: QwerySQL[Create[TBaseModel]], *args: TBaseModel):
+        self.execute(__qwery.__sql__.format([]))
+
+    def read_all(
+            self,
+            __qwery: QwerySQL[Read[TBaseModel]],
+            *args,
+            **kwargs
+    ) -> Iterator[TBaseModel]:
+        print(args, kwargs)
         args, kwargs = self._build_py_sql(*args, **kwargs)
-        self.execute(__qwery.__sql__().format(*args, **kwargs))
-        return self._build_py_orm_model(value=__qwery.model, data=self.fetchall())
+        print(args, kwargs)
+        print(__qwery.__sql__.format(*args, **kwargs))
+        self.execute(__qwery.__sql__.format(*args, **kwargs))
+        return self._build_py_orm_model(value=__qwery.__qwery__.model, data=self.fetchall())
 
 
 if BaseModel.__config_py_orm__.driver is None:

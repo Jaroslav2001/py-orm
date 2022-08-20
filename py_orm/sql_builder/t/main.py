@@ -1,5 +1,5 @@
 from typing import Union, Optional, Any
-from .sql_builder import SQLBuilder
+from ..sql_builder import SQLBuilder
 from .column import Column
 from .template import Template
 from .value import Value
@@ -80,9 +80,9 @@ class T(SQLBuilder):
 
     def __sql__(self) -> str:
         if self.right is None:
-            return self.value()
+            return self.value.__sql__()
         else:
-            return f"{self.value()} {self.right.__sql__()}"
+            return f"{self.value.__sql__()} {self.right.__sql__()}"
 
 
 NULL = T(t='NULL')
@@ -100,3 +100,7 @@ def or_(__left: 'T', __right: 'T') -> 'T':
 
 def not_(__value: 'T') -> 'T':
     return NOT.add_t(__value)
+
+
+def b(__value: 'T') -> 'T':
+    return T(t='(').add_t(__value.add_t(T(t=')')))

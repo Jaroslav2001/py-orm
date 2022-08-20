@@ -18,6 +18,7 @@ sqlite = DialectSQL(
     drop_table='DROP TABLE',
     schema_parsing=schema_parsing,
     types=TypesConvert(
+        null=ConvertType(type(None), 'NULL', lambda x: 'NULL'),
         int=ConvertType(int, 'INTEGER', lambda x: x),
         float=ConvertType(float, 'REAL', lambda x: x),
         str=ConvertType(str, 'TEXT', lambda x: f"'{x}'"),
