@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .sql_builder import SQLBuilder
+from ..sql_builder import SQLBuilder
 from py_orm import TBaseModel
 
 
@@ -21,5 +21,7 @@ class Column(SQLBuilder):
             return ''
         return f".{self._table.__tabel_model__.__tabel_name__}"
 
-    def __sql__(self):
+    def __sql__(
+            self, __base: Optional[str] = None
+    ) -> str:
         return f"{self._is_table()}{self.column}"

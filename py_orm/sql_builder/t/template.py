@@ -1,5 +1,5 @@
-from typing import Union
-from .sql_builder import SQLBuilder
+from typing import Union, Tuple, Set
+from ..sql_builder import SQLBuilder
 
 
 class Template(SQLBuilder):
@@ -13,5 +13,5 @@ class Template(SQLBuilder):
             name = ''
         self.name = name
 
-    def __sql__(self):
+    def __sql__(self) -> str:
         return f"{{{self.name}}}"

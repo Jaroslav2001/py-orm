@@ -3,8 +3,10 @@ from typing import List, Iterator, Generic
 from pydantic.fields import ModelField
 
 from py_orm.field import FieldInfo
-from py_orm import TBaseModel, T, add_
-from sql_builder.qwery import Qwery
+from py_orm import TBaseModel
+
+from ..t import T, add_
+from ..qwery import Qwery
 
 
 class Update(Qwery, Generic[TBaseModel]):

@@ -1,4 +1,4 @@
-from .sql_builder import SQLBuilder
+from ..sql_builder import SQLBuilder
 
 
 class Operator(SQLBuilder):
