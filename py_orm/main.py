@@ -9,16 +9,19 @@ from typing import (
     NoReturn,
     Type,
     Optional,
+    Iterable,
 )
 
 from pydantic import (
     BaseModel as _BaseModel,
 )
 import pydantic.main
+from pydantic.fields import ModelField
 
-from setting import Config, ConfigFull
-from dialect.main import DialectType
-from py_orm.driver.init import is_async, Driver
+from py_orm.field import Field, FieldInfo
+from py_orm.setting import Config, ConfigFull
+from py_orm.dialect.main import DialectType
+from py_orm.driver.init import Driver
 
 
 def is_type(_type: Any, type_name: Literal[
@@ -68,6 +71,14 @@ class BaseModel(_BaseModel, metaclass=ModelMetaclass):
     __tabel_name__: Union[bool, str]
     __tabel_model__: Optional['TBaseModel']
 
+    @classmethod
+    def py_orm_not_primary_column_in_self(cls) -> Iterable[str]:
+        __primary_key = cls.py_orm_primary_key_in_model()
+
+        for __name in cls.py_orm_all_column_in_self():
+            if not(__name in __primary_key):
+                yield __name
+
 
 def set_config(config: Config) -> NoReturn:
     driver_name_: Optional[Driver]
@@ -104,7 +115,6 @@ def set_config(config: Config) -> NoReturn:
         migrate_dir=config.migrate_dir,
         driver=driver_name_,
         dialect=dialect,
-        async_=is_async(driver_name_),
         username=username,
         password=password,
         host=host,

@@ -15,10 +15,9 @@ python = "^3.10"
 
 pydantic = "^1.9"
 typer = "^0.6"
+PyPika = "^0.48"
+returns = "^0.19"
 
-# driver database
-pymysql = {version = "^1.0", optional = true}
-psycopg2 = {version = "^2.9", optional = true}
 # driver database async
 asyncpg = {version = "^0.26", optional = true}
 aiomysql = {version = "^0.1", optional = true}
@@ -26,22 +25,17 @@ aiosqlite = {version = "^0.17", optional = true}
 
 [tool.poetry.extras]
 # driver database
-pymysql = ["pymysql"]
-psycopg2 = ["psycopg2"]
 asyncpg = ["asyncpg"]
 aiomysql = ["aiomysql"]
 aiosqlite = ["aiosqlite"]
 
 all_drivers = [
-    "pymysql", "psycopg2", "asyncpg", "aiomysql", "aiosqlite"
+    "asyncpg", "aiomysql", "aiosqlite"
 ]
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"
 mkdocs-material = "^8.3"
-
-pymysql  = "^1.0"
-psycopg2  = "^2.9"
 
 asyncpg = "^0.26"
 aiomysql  = "^0.1"

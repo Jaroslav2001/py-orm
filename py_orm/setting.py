@@ -17,7 +17,6 @@ class ConfigFull(Config):
     # auto config
     driver: Optional[Driver]
     dialect: Literal['sqlite', 'mysql', 'postgresql']
-    async_: Optional[bool]
 
     username: Optional[str]
     password: Optional[str]

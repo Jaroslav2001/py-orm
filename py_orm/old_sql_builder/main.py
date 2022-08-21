@@ -1,10 +1,23 @@
-from typing import Type, List, Iterator, Tuple
+from typing import (
+    TypeVar, Type, Iterator, Tuple, List,
+)
 
-from dialect import dialect
-from py_orm import TBaseModel, BaseModel
+from abc import ABC, abstractmethod
+
+from py_orm import BaseModel, TBaseModel
+from py_orm.dialect.main import dialect
 
 
-class BaseDriver:
+class SQLBuilder(ABC):
+    @abstractmethod
+    def __sql__(self) -> str:
+        ...
+
+    @staticmethod
+    def decorator_value(value) -> str:
+        __types = dialect[BaseModel.__config_py_orm__.dialect].types.__types__
+        return __types[type(value)].python_sql(value)
+
     @staticmethod
     def _join(values: str, parent: str):
         return f"{parent.join(values)}"
@@ -40,9 +53,4 @@ class BaseDriver:
         return tuple(args), kwargs
 
 
-class BaseConnectionDriver(BaseDriver):
-    pass
-
-
-class BaseCursorDriver(BaseDriver):
-    pass
+TSQLBuilder = TypeVar('TSQLBuilder', bound=SQLBuilder)

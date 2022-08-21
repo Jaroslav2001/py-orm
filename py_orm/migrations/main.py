@@ -8,7 +8,7 @@ from typer import confirm
 from typing import NoReturn, TypedDict, Tuple
 
 from py_orm import BaseModel
-from sql_builder.migrate import Database
+from py_orm.old_sql_builder.migrate import Database
 
 metadata: str = 'py_orm.json'
 

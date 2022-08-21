@@ -2,8 +2,8 @@ from typing import List, Optional
 
 from py_orm import BaseModel
 
-from ..sql_builder import SQLBuilder
-from dialect import dialect, DialectSQL
+from ..main import SQLBuilder
+from py_orm.dialect import dialect, DialectSQL
 from .column import Column
 
 

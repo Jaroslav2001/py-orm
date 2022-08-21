@@ -1,19 +1,17 @@
 from abc import ABC, abstractmethod
 from typing import (
-    TypeVar,
     NoReturn,
-    Iterator, Type,
+    TypeVar,
 )
 
 from dialect.main import default_driver
 from error import NotSupportDriverError
-from py_orm import BaseModel, TBaseModel
-from sql_builder.qwery import TQwery
-from .main import BaseConnectionDriver, BaseCursorDriver
+from py_orm import BaseModel
 
 
-class AbstractConnectionDriver(BaseConnectionDriver, ABC):
+class BaseConnectionDriver(ABC):
     """PEP 249 - Python Database API Specification v2.0"""
+
     @abstractmethod
     async def close(self) -> NoReturn:
         ...
@@ -43,8 +41,7 @@ class AbstractConnectionDriver(BaseConnectionDriver, ABC):
         ...
 
 
-class AbstractCursorDriver(BaseCursorDriver, ABC):
-    """PEP 249 - Python Database API Specification v2.0"""
+class BaseCursorDriver:
     connection: 'TConnection'
 
     @abstractmethod
@@ -71,12 +68,6 @@ class AbstractCursorDriver(BaseCursorDriver, ABC):
     async def fetchall(self):
         ...
 
-    async def exex(self, value: TQwery[TBaseModel]):
-        await self.execute(value.__sql__())
-
-    async def get_all(self, value: Type[TBaseModel]) -> Iterator[TBaseModel]:
-        return self._build_py_orm_model(value=value, data=await self.fetchall())
-
 
 if BaseModel.__config_py_orm__.driver is None:
     BaseModel.__config_py_orm__.driver = default_driver[(
@@ -95,11 +86,11 @@ if 'aiosqlite' == BaseModel.__config_py_orm__.driver:
         Cursor as _Cursor,
     )
 
-    class Cursor(_Cursor, AbstractCursorDriver):
+    class Cursor(_Cursor, BaseCursorDriver):
         pass
 
 
-    class Connection(_Connection, AbstractConnectionDriver):
+    class Connection(_Connection, BaseConnectionDriver):
         async def cursor(self, **kwargs) -> 'TCursor':
             return Cursor(self, await self._execute(self._conn.cursor))
 

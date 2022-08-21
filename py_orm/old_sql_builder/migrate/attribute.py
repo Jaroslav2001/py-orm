@@ -2,7 +2,7 @@ from typing import Optional
 
 from py_orm import BaseModel
 from py_orm.dialect import dialect
-from ..sql_builder import SQLBuilder
+from ..main import SQLBuilder
 
 
 class Attribute(SQLBuilder):

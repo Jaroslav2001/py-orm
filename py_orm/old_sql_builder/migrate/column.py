@@ -1,6 +1,6 @@
 from typing import Union, Tuple
 
-from ..sql_builder import SQLBuilder
+from ..main import SQLBuilder
 
 
 from .attribute import Attribute
