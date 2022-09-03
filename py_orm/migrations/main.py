@@ -8,7 +8,7 @@ from typer import confirm
 from typing import NoReturn, TypedDict, Tuple
 
 from py_orm import BaseModel
-from py_orm.old_sql_builder.migrate import Database
+from .database import Database
 
 metadata: str = 'py_orm.json'
 
@@ -58,20 +58,6 @@ def get_sql_file(number: int):
             ), 'r'
     ) as file:
         return file.read()
-
-
-def execute(sql: str, *args, **kwargs) -> NoReturn:
-    if BaseModel.__config_py_orm__.async_:
-        # Create execute async_
-        pass
-    else:
-        from py_orm.driver.sync import connect, TConnection
-
-        with connect() as connect_:
-            connect_: TConnection
-            cursor = connect_.cursor()
-            cursor.execute(sql, *args, **kwargs)
-            connect_.commit()
 
 
 def create_sql_migrate(yes: bool):

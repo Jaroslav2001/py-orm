@@ -12,3 +12,7 @@ class NotLinkTableModel(PyORMError):
 
 class BinaryOperationError(PyORMError):
     pass
+
+
+class ColumnError(PyORMError):
+    pass

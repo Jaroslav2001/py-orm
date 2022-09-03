@@ -1,45 +1,33 @@
-from typing import Any, Optional, Union, TYPE_CHECKING, Tuple
+from typing import (
+    Any,
+    Optional,
+    Union,
+    TYPE_CHECKING,
+    Tuple,
+)
 
-from pydantic.fields import FieldInfo as _FieldInfo, Undefined
+from pydantic.fields import Undefined
 from pydantic.typing import NoArgAnyCallable
+
+from .main import FieldInfo, OnActions
 
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, MappingIntStrAny
+    from py_orm.sql_builder.terms.sql import T_SQL
 
 
-class FieldInfo(_FieldInfo):
-    __slots__ = _FieldInfo.__slots__ + (
-        'length',
-        'primary_key',
-        'foreign_key',
-        'unique',
-        'index',
-        'auto_increment',
-        'nullable',
-    )
-
-    def __init__(self, default: Any = Undefined, **kwargs: Any):
-        self.length = kwargs.pop('length')
-        self.auto_increment = kwargs.pop('auto_increment')
-        self.primary_key = kwargs.pop('primary_key')
-        self.foreign_key = kwargs.pop('foreign_key')
-        self.unique = kwargs.pop('unique')
-        self.index = kwargs.pop('index')
-        self.nullable = None
-        if self.primary_key:
-            self.auto_increment = True
-        super().__init__(default, **kwargs)
-
-
-def Field(
+def Index(
     default: Any = Undefined,
     *,
     length: Union[int, Tuple[int, int], None] = None,
     primary_key: bool = False,
-    foreign_key: Optional[str] = None,
-    unique: bool = False,
-    index: bool = False,
     auto_increment: bool = False,
+    foreign_key: Optional[str] = None,
+    on_delete: Optional[OnActions] = None,
+    on_update: Optional[OnActions] = None,
+    unique: bool = False,
+    distinct: bool = False,
+    query: Optional['T_SQL'] = None,
     default_factory: Optional[NoArgAnyCallable] = None,
     alias: str = None,
     title: str = None,
@@ -68,11 +56,20 @@ def Field(
     field_info = FieldInfo(
         default,
         length=length,
+
         primary_key=primary_key,
-        foreign_key=foreign_key,
-        unique=unique,
-        index=index,
         auto_increment=auto_increment,
+
+        foreign_key=foreign_key,
+        on_delete=on_delete,
+        on_update=on_update,
+
+        unique=unique,
+        index=True,
+
+        distinct=distinct,
+        query=query,
+
         default_factory=default_factory,
         alias=alias,
         title=title,

@@ -1,30 +1,18 @@
 from typing import (
     Dict,
-    Any,
-    Tuple,
-    TYPE_CHECKING,
-    TypeAlias,
-    Literal,
 )
 
-from .abstract import DialectSQL
-from .sqlite import sqlite
+from typing_extensions import (
+    TypeAlias,
+    Literal,
+    Type,
+)
 
-if TYPE_CHECKING:
-    from py_orm.driver.init import Driver
+from .abstract import TDialectAbstract
+from .sqlite import Sqlite
 
 DialectType: TypeAlias = Literal['sqlite', 'mysql', 'postgresql']
 
-dialect: Dict[DialectType, DialectSQL] = {
-    'sqlite': sqlite,
+dialect: Dict[DialectType, Type[TDialectAbstract]] = {
+    'sqlite': Sqlite,
 }
-
-default_driver: Dict[Tuple[DialectType, bool], 'Driver'] = {
-    ('sqlite', False): 'sqlite3',
-    ('mysql', False): 'pymysql',
-    ('postgresql', False): 'psycopg2',
-    ('sqlite', True): 'aiosqlite',
-    ('mysql', True): 'aiomysql',
-    ('postgresql', True): 'asyncpg',
-}
-

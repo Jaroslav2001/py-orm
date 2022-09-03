@@ -1,0 +1,72 @@
+from typing import Type, Iterable, Generic
+
+from pydantic.fields import ModelField
+
+from py_orm.error import ColumnError
+from ..field import FieldInfo
+from ..queries import TBaseModel
+
+
+from .node import Column
+from .sql import SQL
+
+
+class TableModel(Generic[TBaseModel], SQL):
+    _value: Type[TBaseModel]
+
+    def __init__(self, __value: Type[TBaseModel]):
+        self._value = __value
+
+    def column(self, __name: str) -> Column:
+        if __name in self._value.__fields__.keys():
+            __field = self._value.__fields__[__name]
+            __field: ModelField
+            if isinstance(__field.field_info, FieldInfo):
+                __field: FieldInfo = __field.field_info
+                return Column(
+                    __name,
+                    self._value,
+                    alias=__field.alias,
+                    distinct=__field.distinct,
+                )
+            return Column(
+                __name,
+                self._value,
+                alias=__field.field_info.alias,
+            )
+        raise ColumnError()
+
+    def column_all(self) -> Iterable[Column]:
+        for __name, __model in self._value.__fields__.items():
+            __model: ModelField
+            if isinstance(__model.field_info, FieldInfo):
+                __field: FieldInfo = __model.field_info
+                yield Column(
+                    __name,
+                    self._value,
+                    alias=__field.alias,
+                    distinct=__field.distinct,
+                )
+            else:
+                yield Column(
+                    __name,
+                    self._value,
+                    alias=__model.field_info.alias,
+                )
+
+    def column_key_model(self) -> Iterable[Column]:
+        for __name, __model in self._value.__tabel_model__.__fields__.items():
+            __model: ModelField
+            if isinstance(__model.field_info, FieldInfo):
+                __field: FieldInfo = __model.field_info
+                if __field.primary_key:
+                    yield Column(
+                        __name,
+                        self._value,
+                        alias=__field.alias,
+                        distinct=__field.distinct,
+                    )
+
+    @property
+    def __sql__(self) -> str:
+        return f'"{self._value.__tabel_model__.__tabel_name__}"'

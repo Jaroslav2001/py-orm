@@ -1,2 +1,2 @@
 from .main import dialect
-from .abstract import DialectSQL
+from .abstract import DialectAbstract, TDialectAbstract

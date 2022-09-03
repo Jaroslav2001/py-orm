@@ -11,9 +11,10 @@ documentation = "https://jaroslav2001.github.io/py-orm"
 py-orm = "py_orm.script.main:app"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8"
 
-pydantic = "^1.9"
+pydantic = "^1.10"
+typing_extensions = "^4.3"
 typer = "^0.6"
 PyPika = "^0.48"
 returns = "^0.19"
@@ -35,7 +36,8 @@ all_drivers = [
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"
-mkdocs-material = "^8.3"
+mkdocs-material = "^8.4"
+mypy = "^0.971"
 
 asyncpg = "^0.26"
 aiomysql  = "^0.1"

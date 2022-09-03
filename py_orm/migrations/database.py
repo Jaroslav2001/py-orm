@@ -3,15 +3,14 @@ from typing import List, Optional
 from pydantic.fields import ModelField
 
 from py_orm import BaseModel, TBaseModel
-from py_orm.main import is_type
+from py_orm.main import is_type, Metadata
 from py_orm.dialect import dialect
 from py_orm.field import FieldInfo
 
-from .. import SQLBuilder
-from . import Attribute, Column, MigrationsModel
+from .migrations_model import MigrationsModel
 
 
-class Database(SQLBuilder):
+class Database:
     _new_model: List[MigrationsModel]
     _old_model: List[MigrationsModel]
     _sql_command: List[str]

@@ -1,37 +1,42 @@
-from typing import TYPE_CHECKING
-
-from .abstract import DialectSQL, ConvertType, TypesConvert
-
-if TYPE_CHECKING:
-    from py_orm.migrations.migrations_model import MigrationsModel
-
-
-def schema_parsing() -> 'MigrationsModel':
-    pass
-
-
-sqlite = DialectSQL(
-    list_table="SELECT name FROM sqlite_schema WHERE type == 'table';",
-    schema_table="SELECT sql FROM sqlite_schema WHERE type == 'table' AND name = {name};",
-    create_table='CREATE TABLE',
-    alter_table='ALTER TABLE',
-    drop_table='DROP TABLE',
-    schema_parsing=schema_parsing,
-    types=TypesConvert(
-        null=ConvertType(type(None), 'NULL', lambda x: 'NULL'),
-        int=ConvertType(int, 'INTEGER', lambda x: x),
-        float=ConvertType(float, 'REAL', lambda x: x),
-        str=ConvertType(str, 'TEXT', lambda x: f"'{x}'"),
-        bool=ConvertType(bool, 'INT', lambda x: '1' if x else '0'),
-        bytes=ConvertType(bytes, 'BLOB', lambda x: x),
-    ),
-
-    primary_key='PRIMARY KEY',
-    foreign_key='foreign_key',
-    unique='UNIQUE',
-    index='INDEX',
-    auto_increment='AUTOINCREMENT',
-
-    not_null='NOT NULL',
-    null='NULL',
+from typing import (
+    Any,
+    Union,
+    Tuple,
 )
+
+from typing_extensions import (
+    Type,
+)
+
+from .abstract import DialectAbstract
+
+
+class Sqlite(DialectAbstract):
+    @classmethod
+    def type_sql(cls, type_: Type, value: Union[int, Tuple[int, int], None] = None) -> str:
+        if isinstance(type_, int):
+            return f"INTEGER{cls.type_sql_value(value)}"
+        if isinstance(type_, float):
+            return f"REAL{cls.type_sql_value(value)}"
+        if isinstance(type_, str):
+            return f"TEXT{cls.type_sql_value(value)}"
+        if isinstance(type_, bytes):
+            return f"BLOB{cls.type_sql_value(value)}"
+        if isinstance(type_, bool):
+            return f"INTEGER(1)"
+
+    @staticmethod
+    def type_sql_value(value: Union[int, Tuple[int, int], None]):
+        if value is None:
+            return ''
+        if isinstance(value, int):
+            return f"({value})"
+        return f"({value[0]}, {value[1]})"
+
+    @staticmethod
+    def py_sql(value: Any) -> str:
+        pass
+
+    @staticmethod
+    def sql_py(value: str) -> Any:
+        pass

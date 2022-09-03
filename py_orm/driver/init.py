@@ -1,8 +1,12 @@
 from typing import (
+    List,
+)
+
+from typing_extensions import (
     Literal,
     TypeAlias,
-    List
 )
+
 
 Driver: TypeAlias = Literal[
     "asyncpg", "aiomysql", "aiosqlite",

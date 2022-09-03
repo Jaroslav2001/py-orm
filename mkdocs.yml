@@ -8,7 +8,7 @@ nav:
   - Fast start: fast_start.md
   - Tutorial:
       - tutorial/install.md
-      - tutorial/setting.md
+      - tutorial/setting_model.md
       - Model Py ORM:
           - tutorial/model/index.md
       - Migrations:

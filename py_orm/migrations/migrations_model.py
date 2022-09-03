@@ -1,32 +1,65 @@
 from typing import List, Optional
 
 from py_orm import BaseModel
-
-from ..main import SQLBuilder
 from py_orm.dialect import dialect, DialectSQL
+
 from .column import Column
 
+from pypika import (
+    Query,
+    Column as _Column,
+    Table as _Table
+)
 
-class MigrationsModel(SQLBuilder):
+from ..main import Metadata
+
+
+class MigrationsModel:
     name: str
     columns: List[Column]
+    metadata: Metadata
     mode: Optional[bool]
 
     def __init__(
             self,
             name: str,
             columns: List[Column],
+            metadata: Metadata,
             mode: Optional[bool] = None,
     ):
         self.name = name
         self.columns = columns
         self.mode = mode
+        self.metadata = metadata
 
     @staticmethod
     def _dialect() -> DialectSQL:
         return dialect[BaseModel.__config_py_orm__.dialect]
 
     def __sql_create_table__(self) -> str:
+        q = Query().create_table(_Table(self.name))
+
+        __columns = []
+        for i in self.columns:
+            __columns.append(_Column(
+                i.name,
+                i.type_,
+                nullable=i.attribute.null,
+                default=i.attribute.default,
+            ))
+        q = q.columns(*__columns)
+
+        _m = []
+        for i in self.metadata.primary_key:
+            _m.append(i)
+        q = q.primary_key(*_m)
+
+        _m = []
+        for i in self.metadata.unique:
+            _m.append(i)
+        q = q.unique(*_m)
+
+        print(q)
         _columns = ",\n\t".join((x.__sql__() for x in self.columns))
         return f"{self._dialect().create_table} {self.name} (\n\t{_columns}\n);"
 
