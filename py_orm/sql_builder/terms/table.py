@@ -3,18 +3,18 @@ from typing import Type, Iterable, Generic
 from pydantic.fields import ModelField
 
 from py_orm.error import ColumnError
-from ..field import FieldInfo
-from ..queries import TBaseModel
+from py_orm.field import FieldInfo
+from py_orm.models import TBaseModelCRUD
 
 
 from .node import Column
 from .sql import SQL
 
 
-class TableModel(Generic[TBaseModel], SQL):
-    _value: Type[TBaseModel]
+class TableModel(Generic[TBaseModelCRUD], SQL):
+    _value: Type[TBaseModelCRUD]
 
-    def __init__(self, __value: Type[TBaseModel]):
+    def __init__(self, __value: Type[TBaseModelCRUD]):
         self._value = __value
 
     def column(self, __name: str) -> Column:
@@ -55,17 +55,11 @@ class TableModel(Generic[TBaseModel], SQL):
                 )
 
     def column_key_model(self) -> Iterable[Column]:
-        for __name, __model in self._value.__tabel_model__.__fields__.items():
-            __model: ModelField
-            if isinstance(__model.field_info, FieldInfo):
-                __field: FieldInfo = __model.field_info
-                if __field.primary_key:
-                    yield Column(
-                        __name,
-                        self._value,
-                        alias=__field.alias,
-                        distinct=__field.distinct,
-                    )
+        for __key in self._value.__tabel_model__.__table_field__.primary_key_:
+            yield Column(
+                __key,
+                self._value,
+            )
 
     @property
     def __sql__(self) -> str:

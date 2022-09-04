@@ -1,139 +1,42 @@
+import re
 from typing import (
     Optional,
     List,
     Generic,
-    TypeVar,
-    Callable
 )
 
 
 from typing_extensions import (
     Type,
     Self,
-    TYPE_CHECKING,
 )
 
 
 from ..terms import *
-from .main import BaseModel, ModelMetaclass
-
-if TYPE_CHECKING:
-    from .query_builder_model import TBaseModelDB
+from py_orm.models import TBaseModelCRUD
 
 
-# CRUD Model
-class ModelMetaclassCRUD(ModelMetaclass):
-    def __new__(mcs, name, bases, namespace, **kwargs):
-        _base_model: Type[TBaseModelCRUD] = super().__new__(
-            mcs,
-            name,
-            bases,
-            namespace,
-            **kwargs,
+class Request:
+    __sql__: str
+
+    def __init__(self, __query: 'QueryBuilder'):
+        self.__sql__ = __query.__sql__
+
+    def __call__(self, *args, **kwargs) -> str:
+        regex_ = re.search(
+            r'\$for\(([\w\s\{\}\.,]*)\)',
+            self.__sql__,
         )
-        if _base_model.__module__ != __name__:
-            _base_model.__query__ = QueryBuilder(_base_model)
-        return _base_model
-
-
-class BaseModelCRUD(BaseModel, metaclass=ModelMetaclassCRUD):
-    __tabel_model__: Optional['TBaseModelDB']
-    __query__: 'QueryBuilder'
-
-
-TBaseModelCRUD = TypeVar('TBaseModelCRUD', bound=BaseModelCRUD)
-
-
-# Create Model
-class ModelMetaclassCreate(ModelMetaclassCRUD):
-    def __new__(mcs, name, bases, namespace, **kwargs):
-        _base_model: Type[BaseModelCreate] = super().__new__(
-            mcs,
-            name,
-            bases,
-            namespace,
-            **kwargs,
+        if regex_ is None:
+            return self.__sql__.format(*args, **kwargs)
+        __result: List[str] = []
+        for _model in args:
+            __result.append(regex_.groups()[0].format(**_model))
+        return re.sub(
+            r'\$for\(([\w\s\{\}\.,]*)\)',
+            ', '.join(__result),
+            self.__sql__,
         )
-        if _base_model.__module__ != __name__:
-            _base_model.__query__ = _base_model.__query__.insert_into()
-        return _base_model
-
-
-class BaseModelCreate(BaseModelCRUD, metaclass=ModelMetaclassCreate):
-    __tabel_name__: str
-    __query__: 'QueryBuilder'
-
-
-TBaseModelCreate = TypeVar('TBaseModelCreate', bound=BaseModelCreate)
-
-
-# Read Model
-class ModelMetaclassRead(ModelMetaclassCRUD):
-    def __new__(mcs, name, bases, namespace, **kwargs):
-        _base_model: Type[BaseModelRead] = super().__new__(
-            mcs,
-            name,
-            bases,
-            namespace,
-            **kwargs,
-        )
-        if _base_model.__module__ != __name__:
-            _base_model.__query__ = _base_model.__query__.select()
-        return _base_model
-
-
-class BaseModelRead(BaseModelCRUD, metaclass=ModelMetaclassRead):
-    __tabel_name__: str
-    __query__: 'QueryBuilder'
-
-
-TBaseModelRead = TypeVar('TBaseModelRead', bound=BaseModelRead)
-
-
-# Update Model
-class ModelMetaclassUpdate(ModelMetaclassCRUD):
-    def __new__(mcs, name, bases, namespace, **kwargs):
-        _base_model: Type[BaseModelUpdate] = super().__new__(
-            mcs,
-            name,
-            bases,
-            namespace,
-            **kwargs,
-        )
-        if _base_model.__module__ != __name__:
-            _base_model.__query__ = _base_model.__query__.update()
-        return _base_model
-
-
-class BaseModelUpdate(BaseModelCRUD, metaclass=ModelMetaclassUpdate):
-    __tabel_name__: str
-    __query__: 'QueryBuilder'
-
-
-TBaseModelUpdate = TypeVar('TBaseModelUpdate', bound=BaseModelUpdate)
-
-
-# Delete Model
-class ModelMetaclassDelete(ModelMetaclassCRUD):
-    def __new__(mcs, name, bases, namespace, **kwargs):
-        _base_model: Type[BaseModelDelete] = super().__new__(
-            mcs,
-            name,
-            bases,
-            namespace,
-            **kwargs,
-        )
-        if _base_model.__module__ != __name__:
-            _base_model.__query__ = _base_model.__query__.delete()
-        return _base_model
-
-
-class BaseModelDelete(BaseModelCRUD, metaclass=ModelMetaclassDelete):
-    __tabel_name__: str
-    __query__: 'QueryBuilder'
-
-
-TBaseModelDelete = TypeVar('TBaseModelDelete', bound=BaseModelDelete)
 
 
 class QueryBuilder(Generic[TBaseModelCRUD], SQL):
@@ -142,7 +45,7 @@ class QueryBuilder(Generic[TBaseModelCRUD], SQL):
     _update: bool
     _delete: bool
 
-    _t_base_model: Optional[Type[TBaseModelCRUD]]
+    _t_base_model: Type[TBaseModelCRUD]
 
     _columns: List[Column]
     _values: List[TBaseModelCRUD]
@@ -282,16 +185,3 @@ class QueryBuilder(Generic[TBaseModelCRUD], SQL):
                 return f" WHERE {self._where[0].__sql__}"
             return f" WHERE {'AND'.join(self._where)}"
         return ''
-
-
-def builder_manager(
-        func: Callable[..., QueryBuilder],
-        return_model: Optional[TBaseModelRead] = None,
-):
-    def wrapper(cls, *args, **kwargs):
-        __sql__: str = func(cls, *args, **kwargs).__sql__
-
-        def decorator():
-            return
-        return decorator
-    return wrapper

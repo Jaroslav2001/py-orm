@@ -1,4 +1,5 @@
-from typing import Set, TypeVar
+import re
+from typing import Set, TypeVar, Callable, Optional, Union
 
 from typing_extensions import TYPE_CHECKING
 
@@ -8,6 +9,8 @@ from pydantic import BaseModel as _BaseModel
 if TYPE_CHECKING:
     from py_orm.config import ConfigFull
     from py_orm.driver.abstract import TAbstractConnector
+    from py_orm.sql_builder import ModelBuilder
+    from py_orm.sql_builder import QueryBuilder
 
 
 class ModelMetaclass(pydantic.main.ModelMetaclass):
@@ -33,3 +36,9 @@ class BaseModel(_BaseModel, metaclass=ModelMetaclass):
 
 
 TBaseModel = TypeVar('TBaseModel', bound=BaseModel)
+
+
+def manager_core(
+        __sql__: str
+) -> Optional['TBaseModel']:
+    pass

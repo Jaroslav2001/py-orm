@@ -14,7 +14,7 @@ from typing import (
 
 from .sql import SQL
 
-from ..queries import TBaseModel
+from py_orm.models import TBaseModel
 
 
 def node_wrapper(func: Callable[['TNode', Any], 'TNode']):
@@ -203,7 +203,7 @@ class ParameterBase(Node, ABC):
     def _braces_model(self, __value: Type['TBaseModel']):
         __table_name = __value.__tabel_model__.__tabel_name__
         return ", ".join(map(
-            lambda x: self._braces(f"{__table_name}.{x}"),
+            lambda x: self._braces(f"{x}"),
             __value.__fields__.keys(),
         ))
 
